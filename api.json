@@ -1,0 +1,550 @@
+SUAP API
+ 1.0.0 
+OAS 3.1
+/api/openapi.json
+
+Authorize
+token
+
+
+POST
+/api/token/pair
+Obtain Token
+
+
+POST
+/api/token/refresh
+Refresh Token
+
+
+POST
+/api/token/verify
+Verify Token
+
+Gestão de Pessoas
+
+
+GET
+/api/rh/meus-dados/
+Obtem meu perfil pessoal
+
+
+
+GET
+/api/rh/eu/
+Obtém meus dados pessoais
+
+
+
+GET
+/api/rh/unidades-organizacionais/
+Obtem campi
+
+
+
+GET
+/api/rh/servidores/
+Obtem servidores
+
+
+
+GET
+/api/rh/servidores/detalhado/
+Obtem dados detalhados de servidores
+
+
+
+GET
+/api/rh/servidores/integra/
+Obtem dados de servidores com escopo do integra
+
+
+
+GET
+/api/rh/setores/
+Obtem setores
+
+
+
+GET
+/api/rh/meu-historico-funcional/
+Obtem meu histórico Funcional
+
+
+
+GET
+/api/rh/minhas-ocorrencias-afastamentos/
+Obtem meus afastamentos
+
+
+
+GET
+/api/rh/emitir-carteira-funcional-digital/{matricula}/
+Obtem carteira funcional digital
+
+
+
+GET
+/api/rh/minhas-ferias/
+Obtem minhas férias
+
+
+
+GET
+/api/rh/minhas-frequencias/
+Obtem minhas frequências do dia
+
+
+
+GET
+/api/rh/servidor-resumido/
+Obtém dados resumidos de servidor especifico.
+
+
+
+GET
+/api/rh/meus-contracheques/
+Obtém meus contracheques
+
+
+
+GET
+/api/rh/meu-contracheque/{ano}/{mes}/
+Obtém meu contracheque detalhado
+
+
+
+GET
+/api/rh/contracheques/
+Obtém todos os contracheques
+
+
+Ensino
+
+
+GET
+/api/ensino/periodos/
+Obtém períodos
+
+
+
+GET
+/api/ensino/diarios/{semestre}/
+Obtém diários
+
+
+
+GET
+/api/ensino/diarios/{id_diario}/professores/
+Obtém professores
+
+
+
+GET
+/api/ensino/diarios/{id_diario}/alunos/
+Obtém alunos
+
+
+
+GET
+/api/ensino/diarios/{id_diario}/aulas/
+Obtém aulas
+
+
+
+GET
+/api/ensino/diarios/{id_diario}/materiais/
+Obtém materiais
+
+
+
+GET
+/api/ensino/materiais/{id_material}/
+Obtém material
+
+
+
+GET
+/api/ensino/materiais/{id_diario}/{id_material}/pdf/
+Obtém PDF do material
+
+
+
+GET
+/api/ensino/diarios/{id_diario}/trabalhos/
+Obtém trabalhos
+
+
+
+GET
+/api/ensino/trabalhos/{id_trabalho}/
+Obtém trabalho
+
+
+
+GET
+/api/ensino/diarios/{id_diario}/topicos/
+Obtém tópicos
+
+
+
+GET
+/api/ensino/disciplinas/{semestre}/
+Obtém disciplinas
+
+
+
+GET
+/api/ensino/disciplinas/{disciplina}/etapas/
+Obtém avaliações
+
+
+
+GET
+/api/ensino/mensagens/entrada/{status}/
+Obtém as mensagens do usuário
+
+
+
+POST
+/api/ensino/mensagens/registro-leitura/{mensagem_id}/
+Registra leitura
+
+
+
+DELETE
+/api/ensino/mensagens/registro-exclusao/{mensagem_id}/
+Registra exclusão
+
+
+
+GET
+/api/ensino/meus-dados-aluno/
+Obtém os dados do aluno
+
+
+
+GET
+/api/ensino/requisitos-conclusao/
+Obtém os requisitos de conclusão.
+
+
+
+POST
+/api/ensino/autenticacao/acesso-responsaveis/
+Autentica responsável de aluno menor de idade.
+
+
+GET
+/api/ensino/meu-boletim/{ano_letivo}/{periodo_letivo}/
+Obtém boletim
+
+
+
+GET
+/api/ensino/meus-diarios/
+Obtém diários abertos do professor
+
+
+
+GET
+/api/ensino/meus-diarios/{ano_letivo}/{periodo_letivo}/
+Obtém diários do professor
+
+
+
+GET
+/api/ensino/meus-periodos-letivos/
+Obtém periodos
+
+
+
+GET
+/api/ensino/minhas-proximas-avaliacoes/
+Obtém próximas avaliações
+
+
+
+GET
+/api/ensino/minha-turma-virtual/{pk}/
+Obtém turma virtual
+
+
+
+GET
+/api/ensino/minhas-turmas-virtuais/{ano_letivo}/{periodo_letivo}/
+Obtém turmas virtuais
+
+
+
+GET
+/api/ensino/aluno-resumido/
+Obtém dados resumidos de alunos.
+
+
+
+GET
+/api/ensino/meus-diarios-ead/{pk}/
+Lista um diário de um aluno ou professor EAD
+
+
+
+GET
+/api/ensino/meus-diarios-ead/
+Lista todos os diarios de um aluno ou professor EAD
+
+
+
+GET
+/api/ensino/aluno-matriculado/
+Obtém aluno matriculado
+
+
+
+GET
+/api/ensino/portal-professores/
+Portal Professores
+
+
+Tecnologia da Informação
+
+
+GET
+/api/ti/balcao-digital/{id_servico_portal_govbr}/
+Lista um serviço ativo especifico do catalogo digital
+
+
+
+GET
+/api/ti/balcao-digital/
+Lista todos os serviços ativos do catalogo digital
+
+
+
+GET
+/api/ti/balcao-digital/cpf/{cpf}/
+Lista os serviços disponíveis para um determinado usuário
+
+
+
+GET
+/api/ti/balcao-digital/cpf/{cpf}/avaliacao_disponibilidade/
+Lista os serviços disponíveis para um determinado usuário
+
+
+
+POST
+/api/ti/balcao-digital/autocompletar/
+Retorna uma lista de objetos para a busca do autocompletar do balcao digital
+
+
+
+POST
+/api/ti/balcao-digital/{id_servico_portal_govbr}/cpf/{cpf}/receber_solicitacao/
+Recebe a solicitação de um determinado usuário
+
+
+
+GET
+/api/ti/balcao-digital/{id_servico_portal_govbr}/cpf/{cpf}/receber_solicitacao/
+Recebe a solicitação de um determinado usuário
+
+
+
+GET
+/api/ti/balcao-digital/cpf/{cpf}/acompanhamentos/
+Lista os acompanhamentos de um determinado CPF
+
+
+
+GET
+/api/ti/atualizacoes-suap/
+Obtém as atualizações do SUAP
+
+Comunicação Social
+
+
+GET
+/api/midia/banners/
+Obtém a lista de banners ativos
+
+
+
+GET
+/api/midia/eventos/ativos-deferidos/
+Obtém eventos
+
+
+Administração
+
+
+GET
+/api/administracao/meus-processos-fisicos/
+Obtem meus processos físicos
+
+
+
+GET
+/api/administracao/meu-processo-fisico/{pk}/
+Obtem processo físico pessoal específico detalhado
+
+
+
+GET
+/api/administracao/validar-visitante-portaria/{chave_wifi}/
+Exibe a validade de uma determinada chave wifi.
+
+Pesquisa
+
+
+GET
+/api/pesquisa/projetos/
+Obtém projetos
+
+
+Gestão Institucional
+
+
+GET
+/api/institucional/estatisticas/
+Obtém estatisticas do SUAP
+
+
+GET
+/api/institucional/consulta_publica/documentos/
+Obtem documentos eletrônicos públicos
+
+
+Extensão
+
+
+GET
+/api/extensao/projetos/
+Obtém projetos
+
+
+
+Schemas
+TokenObtainPairOutputSchemaExpand allobject
+TokenObtainPairInputSchemaExpand allobject
+TokenRefreshOutputSchemaExpand allobject
+TokenRefreshInputSchemaExpand allobject
+SchemaExpand allobject
+TokenVerifyInputSchemaExpand allobject
+UserSchemaExpand allobject
+ErrorSchemaExpand allobject
+EuSchemaExpand allobject
+InputExpand allobject
+PagedUnidadeOrganizacionalExpand allobject
+UnidadeOrganizacionalExpand allobject
+ServidorFiltersSchemaExpand allobject
+PagedServidorSchemaExpand allobject
+ServidorSchemaExpand allobject
+DadosBancariosServidorSchemaExpand allobject
+PagedServidorDetalhadoSchemaExpand allobject
+ServidorDetalhadoSchemaExpand allobject
+ServidorIntegraSchemaExpand allobject
+SetorFiltersSchemaExpand allobject
+PagedSetorSchemaExpand allobject
+SetorSchemaExpand allobject
+EventoSchemaExpand allobject
+HistoricoFuncionalSchemaExpand allobject
+PagedHistoricoFuncionalSchemaExpand allobject
+OcorrenciaAfastamentoSchemaExpand allobject
+ServidorAfastamentoSchemaExpand allobject
+ServidorOcorrenciaSchemaExpand allobject
+CarteiraFuncionalSchemaExpand allobject
+FeriasSchemaExpand allobject
+InterrupcaoFeriasExpand allobject
+PagedFeriasSchemaExpand allobject
+FrequenciaHojeSchemaExpand allobject
+FrequenciaSchemaExpand allobject
+DadosServidorResumidoSchemaExpand allobject
+MeuContrachequeSchemaExpand allobject
+PagedMeuContrachequeSchemaExpand allobject
+MeuContraChequeRubricaSchemaExpand allobject
+MeuContrachequeDetalheSchemaExpand allobject
+ContrachequeFiltersSchemaExpand allobject
+ContrachequeSchemaExpand allobject
+PagedContrachequeSchemaExpand allobject
+RubricaSchemaExpand allobject
+PagedPeriodoSchemaExpand allobject
+PeriodoSchemaExpand allobject
+DiarioSchemaExpand allobject
+DisciplinaSchemaExpand allobject
+HorarioSchemaExpand allobject
+LocalSchemaExpand allobject
+NotaSchemaExpand allobject
+PagedDiarioSchemaExpand allobject
+ProfessorSchemaExpand allobject
+SituacaoDisciplinaExpand allobject
+PagedProfessorSchemaExpand allobject
+AlunoDiarioSchemaExpand allobject
+PagedAlunoDiarioSchemaExpand allobject
+AulaSchemaExpand allobject
+PagedAulaSchemaExpand allobject
+MaterialSchemaExpand allobject
+PagedMaterialSchemaExpand allobject
+PagedTrabalhoSchemaExpand allobject
+TrabalhoSchemaExpand allobject
+PagedTopicoSchemaExpand allobject
+RespostaTopicoSchemaExpand allobject
+TopicoSchemaExpand allobject
+PagedDisciplinaSchemaExpand allobject
+AvaliacaoSchemaExpand allobject
+EtapaDisciplinaSchemaExpand allobject
+PagedEtapaDisciplinaSchemaExpand allobject
+MensagemStatusEnumExpand allstring
+MensagemSchemaExpand allobject
+PagedMensagemSchemaExpand allobject
+MeusDadosAlunoExpand allobject
+CargaHorariaSchemaExpand allobject
+RequisitosConclusaoSchemaExpand allobject
+ResponsavelSchemaExpand allobject
+TokenResponsavelSchemaExpand allobject
+BoletimSchemaExpand allobject
+NotaBoletimSchemaExpand allobject
+PagedBoletimSchemaExpand allobject
+AulaDiarioSchemaExpand allobject
+MaterialDeAulaDiarioSchemaExpand allobject
+MeuDiarioSchemaExpand allobject
+PagedMeuDiarioSchemaExpand allobject
+ParticipanteDiarioSchemaExpand allobject
+ProfessorDiarioSchemaExpand allobject
+MeuPeriodoSchemaExpand allobject
+PagedMeuPeriodoSchemaExpand allobject
+ItemConfiguracaoAvaliacaoSchemaExpand allobject
+PagedItemConfiguracaoAvaliacaoSchemaExpand allobject
+MatriculaDiarioSchemaExpand allobject
+MatriculaPeriodoSchemaExpand allobject
+PagedMatriculaPeriodoSchemaExpand allobject
+AlunoSiabiSchemaExpand allobject
+CampusSiabiSchemaExpand allobject
+CursoSiabiSchemaExpand allobject
+DadosSiabiSchemaExpand allobject
+PoloSiabiSchemaExpand allobject
+AlunoMeuDiarioEADSchemaExpand allobject
+MeuDiarioEADSChemaExpand allobject
+PagedMeuDiarioEADSChemaExpand allobject
+DadosAlunoMatriculadoSchemaExpand allobject
+DadosProfessorPortalInstitucionalSchemaExpand allobject
+PagedDadosProfessorPortalInstitucionalSchemaExpand allobject
+RespostaSchemaExpand allobject
+AutocompleteSchemaExpand allobject
+AtualizacaoSchemaExpand allobject
+PagedAtualizacaoSchemaExpand allobject
+BannerSchemaExpand allobject
+PagedBannerSchemaExpand allobject
+PagedEventoSchemaExpand allobject
+ProcessoFiltersSchemaExpand allobject
+PagedProcessoSchemaExpand allobject
+ProcessoSchemaExpand allobject
+ProcessoDetalheSchemaExpand allobject
+AcessoSchemaExpand allobject
+PagedProjetoSchemaExpand allobject
+ProjetoSchemaExpand allobject
+DadosSuapEmNumerosSchemaExpand allobject
+SuapEmNumerosSchemaExpand allobject
+DocumentoTextoFiltersSchemaExpand allobject
+DocumentoTextoSchemaExpand allobject
+PagedDocumentoTextoSchemaExpand allobject
