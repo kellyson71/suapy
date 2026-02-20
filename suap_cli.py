@@ -31,14 +31,29 @@ def do_login():
             console.print(f"\n❌ [bold red]Erro ao logar:[/bold red] {e}")
             sys.exit(1)
 
-def mostrar_boletim_e_faltas(suap):
+def escolher_periodo(suap):
     periodos = suap.ensino.obter_periodos_letivos()
     if not periodos or 'results' not in periodos:
         console.print("[yellow]Nenhum período letivo encontrado.[/yellow]")
-        return
+        return None, None
         
-    p = periodos['results'][0] # Pega o mais recente
-    ano, periodo = p['ano_letivo'], p['periodo_letivo']
+    lista_periodos = periodos['results'][:4] # Pega os 4 mais recentes
+    
+    console.print("\n[bold cyan]Selecione o período letivo:[/bold cyan]")
+    for i, p in enumerate(lista_periodos):
+        console.print(f"{i + 1}. [blue]{p['ano_letivo']}.{p['periodo_letivo']}[/blue]")
+        
+    escolha = console.input("\nPeríodo (padrão 1): ")
+    idx = 0
+    if escolha.isdigit() and 1 <= int(escolha) <= len(lista_periodos):
+        idx = int(escolha) - 1
+        
+    p = lista_periodos[idx]
+    return p['ano_letivo'], p['periodo_letivo']
+
+def mostrar_boletim_e_faltas(suap):
+    ano, periodo = escolher_periodo(suap)
+    if not ano: return
     
     console.print(f"\n[bold blue]📚 Boletim e Faltas - Semestre {ano}.{periodo}[/bold blue]")
     
@@ -72,11 +87,8 @@ def mostrar_boletim_e_faltas(suap):
     console.print(table)
 
 def mostrar_horario_hoje(suap):
-    periodos = suap.ensino.obter_periodos_letivos()
-    if not periodos or 'results' not in periodos: return
-    
-    p = periodos['results'][0]
-    ano, periodo = p['ano_letivo'], p['periodo_letivo']
+    ano, periodo = escolher_periodo(suap)
+    if not ano: return
     
     # Dia da semana (1-7, 1=Segunda?) -> datetime weekday is 0-6 (0=Segunda)
     hoje_fds = datetime.now().weekday() + 2 # 2=Segunda, 3=Terça... 8=Domingo?
