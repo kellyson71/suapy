@@ -1,103 +1,112 @@
-# Suapy 🎓🐍
+<div align="center">
 
-Uma biblioteca Python **moderna, fácil e 100% em português brasileiro (pt-BR)** para acessar a API pública do **SUAP**.
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=32&pause=1000&color=2E9E4F&center=true&vCenter=true&width=500&lines=Suapy+%F0%9F%90%8D;Seu+SUAP%2C+em+Python%2C+em+portugu%C3%AAs." alt="Typing SVG" />
 
-O nome mudou e as ferramentas também! O **Suapy** foi criado pensando especialmente no **ALUNO**. Quer saber quantas **faltas** você tem em uma matéria? Extrair suas médias para um DataFrame do Pandas? Verificar suas **próximas provas** ou ver requisitos de formatura? O Suapy resolve com poucas linhas de código.
+**A biblioteca Python feita para estudantes brasileiros que usam o SUAP.**  
+Acesse faltas, notas, provas e muito mais — com código limpo e em português.
+
+[![PyPI version](https://img.shields.io/pypi/v/suapy?color=2e9e4f&style=flat-square&label=suapy)](https://pypi.org/project/suapy/)
+[![Python](https://img.shields.io/pypi/pyversions/suapy?style=flat-square&color=3572A5)](https://python.org)
+[![License](https://img.shields.io/pypi/l/suapy?style=flat-square&color=orange)](LICENSE)
+[![Downloads](https://img.shields.io/pypi/dm/suapy?style=flat-square&color=blueviolet)](https://pypi.org/project/suapy/)
+
+</div>
+
+---
+
+## ✨ Por que o Suapy?
+
+> Você quer saber **quantas faltas** tem antes de reprovar. Quer ver **quando é sua próxima prova**. Quer jogar suas notas num DataFrame do Pandas e entender de vez o semestre. O Suapy faz isso tudo — em português, com poucas linhas.
+
+---
 
 ## 📦 Instalação
-
-Instale pelo pip diretamente:
 
 ```bash
 pip install suapy
 ```
 
-> **Dica aos Alunos (Data Science)**: Se quiser análises fantásticas de suas notas e frequências usando o Pandas, instale assim:
->
-> ```bash
-> pip install suapy[pandas]
-> ```
+<details>
+<summary>🐼 Usando Pandas? Instale com o extra</summary>
+
+```bash
+pip install suapy[pandas]
+```
+
+</details>
 
 ---
 
-## 🚀 Como Usar (Exemplo Estudantil)
-
-A vida acadêmica ficou mais fácil. Vamos mostrar como acessar seus dados de falhas e avaliações:
+## 🚀 Primeiros passos
 
 ```python
 from suapy import Suap
 
 suap = Suap()
-suap.login("20201014040001", "senha123")
+suap.login("20201014040001", "sua_senha")
 
-# 1. Suas Informações Básicas
+# 👤 Quem sou eu?
 aluno = suap.ensino.obter_dados_aluno()
-print(f"E aí, {aluno['nome_usual']}!")
+print(f"E aí, {aluno['nome_usual']}! 👋")
 
-# 2. Quando é a próxima prova?
+# 📅 Próxima prova
 provas = suap.ensino.obter_proximas_avaliacoes()
 if provas:
-    prox = provas[0]
-    print(f"Lembrete: Prova de {prox['disciplina']} dia {prox['data_avaliacao']}")
+    p = provas[0]
+    print(f"📌 Prova de {p['disciplina']} em {p['data_avaliacao']}")
 
-# 3. Faltas e Notas (Diários do Semestre)
-diarios = suap.ensino.obter_diarios(2023, 1)
-
-print("\nMaterias - Situação de Faltas:")
-for d in diarios:
-    nome = d['disciplina']
-    faltas = d['numero_faltas']
-    situacao = d['situacao']
-    print(f"- {nome}: {faltas} faltas. Status: {situacao}")
+# 📋 Situação das matérias
+for d in suap.ensino.obter_diarios(2024, 1):
+    print(f"• {d['disciplina']}: {d['numero_faltas']} faltas — {d['situacao']}")
 ```
 
 ---
 
-## 🎒 Funções do Aluno (`suap.ensino`)
+## 🎒 O que você pode fazer com `suap.ensino`
 
-O módulo `suap.ensino` contém tudo o que um aluno precisa para interagir com a faculdade/escola:
-
-| Função                            | O que faz?                                                                        |
-| --------------------------------- | --------------------------------------------------------------------------------- |
-| `obter_dados_aluno()`             | Retorna matrícula, curso, dados de cota e contatos do aluno.                      |
-| `obter_diarios(ano, periodo)`     | Extrai as **faltas**, notas e situação do diário no semestre atual.               |
-| `obter_boletim(ano, periodo)`     | Pega o seu boletim oficial (médias finais e carga horária consolidadas).          |
-| `obter_proximas_avaliacoes()`     | Cuidado pra não reprovar! Avisa data das próximas provas e trabalhos cadastrados. |
-| `obter_mensagens_aluno()`         | Vê os recados do SUAP (usando `'nao_lidas'`, `'lidas'` ou `'todas'`).             |
-| `obter_turmas_virtuais(ano, per)` | Links e participantes que compõem sua turma virtual.                              |
-| `obter_requisitos_conclusao()`    | Quantas horas faltam para formar? Quais matérias estão devendo?                   |
+| Função                            | O que retorna                                         |
+| --------------------------------- | ----------------------------------------------------- |
+| `obter_dados_aluno()`             | Matrícula, curso, cotas e contatos                    |
+| `obter_diarios(ano, periodo)`     | Faltas, notas e situação por disciplina               |
+| `obter_boletim(ano, periodo)`     | Médias finais e carga horária                         |
+| `obter_proximas_avaliacoes()`     | Datas de provas e trabalhos cadastrados               |
+| `obter_mensagens_aluno()`         | Recados do SUAP (`'lidas'`, `'nao_lidas'`, `'todas'`) |
+| `obter_turmas_virtuais(ano, per)` | Links e participantes da turma virtual                |
+| `obter_requisitos_conclusao()`    | Horas e matérias que faltam para formar               |
 
 ---
 
-## 📊 Trabalhando com Pandas
-
-Você é tech e quer brincar com seus dados acadêmicos matematicamente?
+## 📊 Analisando suas notas com Pandas
 
 ```python
 from suapy import para_dataframe
 
-boletim = suap.ensino.obter_boletim(2023, 1)
-df_notas = para_dataframe(boletim)
+boletim = suap.ensino.obter_boletim(2024, 1)
+df = para_dataframe(boletim)
 
-# Calcular a média do seu semestre com 1 comando de Pandas:
-minha_media_geral = df_notas['media_final_disciplina'].astype(float).mean()
-print(f"Média Geral do Semestre: {minha_media_geral}")
-```
-
-## ⚙️ Tratamento de Erros
-
-Trate logins inválidos de imediato na sua automação (bot no telegram, dashboard, etc.):
-
-```python
-from suapy import Suap, SuapAuthError
-
-suap = Suap()
-try:
-    suap.login("usuario", "senha_errada")
-except SuapAuthError:
-    print("Vish... Usuário ou senha incorretos.")
+media = df['media_final_disciplina'].astype(float).mean()
+print(f"📈 Sua média geral: {media:.2f}")
 ```
 
 ---
 
-_Feito com 💚 para facilitar a vida do estudante do IF e de todos que utilizam o SUAP._
+## 🔐 Tratando erros de login
+
+```python
+from suapy import Suap, SuapAuthError
+
+try:
+    suap.login("usuario", "senha_errada")
+except SuapAuthError:
+    print("❌ Usuário ou senha incorretos.")
+```
+
+---
+
+<div align="center">
+
+Feito com 💚 para os estudantes do **IF** e de todas as instituições que usam o **SUAP**
+
+_Não é afiliado ao IFRN nem ao projeto SUAP oficial._
+
+</div>
