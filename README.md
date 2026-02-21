@@ -26,12 +26,11 @@ Acesse faltas, notas, provas e muito mais — com código limpo e em português.
 pip install suapy
 ```
 
-### 💻 Usando o Terminal (Novo!)
-
-O Suapy agora tem um CLI oficial! Basta instalar e digitar:
+### 💻 Usando o Terminal
 
 ```bash
 suapy
+
 ```
 
 Isso abrirá uma interface interativa para ver seu boletim, horário e eventos sem precisar escrever uma linha de código.
