@@ -6,12 +6,12 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setuptools.setup(
     name="suapy",
     version="1.0.0",
-    author="Suapy Contributors",
-    author_email="seu_email@example.com",
+    author="Kellyson",
+    author_email="kellyson.m@escolar.ifrn.edu.br",
     description="Uma biblioteca Python incrível e em pt-BR focada na vida do aluno acessando a API do SUAP (IFRN).",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/seuusuario/suapy",
+    url="https://github.com/kellyson71/suapy",
     packages=setuptools.find_packages(include=["suapy", "suapy.*"]),
     classifiers=[
         "Programming Language :: Python :: 3",
