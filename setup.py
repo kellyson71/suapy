@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="suapy",
-    version="1.1.0",
+    version="1.3.0",
     author="Kellyson",
     author_email="kellyson.m@escolar.ifrn.edu.br",
     description="Uma biblioteca Python incrível e em pt-BR focada na vida do aluno acessando a API do SUAP (IFRN).",

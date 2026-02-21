@@ -6,23 +6,47 @@ from rich.columns import Columns
 from suapy import Suap, parse_horario
 import getpass
 import sys
+import os
+import json
+from pathlib import Path
 from datetime import datetime
 
 console = Console()
+SESSION_FILE = Path.home() / ".suapy" / "session.json"
+
+def save_session(refresh_token):
+    SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(SESSION_FILE, "w") as f:
+        json.dump({"refresh": refresh_token}, f)
+
+def load_session():
+    if SESSION_FILE.exists():
+        try:
+            with open(SESSION_FILE, "r") as f:
+                data = json.load(f)
+                return data.get("refresh")
+        except:
+            return None
+    return None
 
 def print_header():
     console.print(Panel.fit("[bold green]Suapy CLI[/bold green] - Central do Estudante IFRN", border_style="green"))
 
-def do_login():
-    suap = Suap()
+def do_login(suap=None):
+    if not suap:
+        suap = Suap()
+    
     usuario = console.input("[bold cyan]Matrícula SUAP:[/bold cyan] ")
     senha = getpass.getpass("Senha: ")
     
     with console.status("Autenticando...", spinner="dots"):
         try:
             suap.login(usuario, senha)
+            save_session(suap.refresh_token)
+            meu_perfil = suap.usuario.obter_meus_dados_resumidos()
             aluno = suap.ensino.obter_dados_aluno()
-            console.print(f"\n✅ [bold green]Login bem-sucedido![/bold green] Olá, [bold]{aluno.get('nome_usual')}[/bold]")
+            nome = meu_perfil.get('nome_usual') or meu_perfil.get('nome') or "Estudante"
+            console.print(f"\n✅ [bold green]Login bem-sucedido![/bold green] Olá, [bold]{nome}[/bold]")
             console.print(f"Curso: {aluno.get('curso')}")
             return suap, aluno
         except Exception as e:
@@ -141,9 +165,10 @@ def mostrar_eventos(suap):
         return
         
     for ev in eventos['results'][:5]:
-        title = ev.get('titulo')
+        title = ev.get('nome') or ev.get('titulo') or "Evento"
         data = ev.get('data_inicio')
-        console.print(Panel(f"{ev.get('descricao')}\n\n[bold]Data:[/bold] {data}", title=f"[bold]{title}[/bold]"))
+        apresentacao = ev.get('apresentacao') or ev.get('descricao') or ""
+        console.print(Panel(f"{apresentacao}\n\n[bold]Data:[/bold] {data}", title=f"[bold]{title}[/bold]"))
 
 def detalhar_progresso(suap):
     console.print(f"\n[bold blue]🎓 Progresso do Curso[/bold blue]")
@@ -200,7 +225,28 @@ def menu(suap):
 
 def main():
     print_header()
-    suap, aluno = do_login()
+    suap = Suap()
+    refresh_token = load_session()
+    login_ok = False
+    nome = "Estudante"
+    
+    if refresh_token:
+        with console.status("Validando sessão anterior...", spinner="dots"):
+            try:
+                suap.refresh_token = refresh_token
+                suap.renovar_token()
+                meu_perfil = suap.usuario.obter_meus_dados_resumidos()
+                nome = meu_perfil.get('nome_usual') or meu_perfil.get('nome') or "Estudante"
+                login_ok = True
+            except Exception:
+                console.print("[yellow]Sessão expirada. Por favor, faça login novamente.[/yellow]")
+    
+    if login_ok:
+        console.print(f"\n✅ [bold green]Sessão restaurada![/bold green] Bem-vindo de volta, [bold]{nome}[/bold]")
+        menu(suap)
+        return
+    
+    suap, aluno = do_login(suap)
     menu(suap)
 
 if __name__ == "__main__":
