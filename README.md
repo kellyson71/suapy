@@ -26,6 +26,16 @@ Acesse faltas, notas, provas e muito mais — com código limpo e em português.
 pip install suapy
 ```
 
+### 💻 Usando o Terminal (Novo!)
+
+O Suapy agora tem um CLI oficial! Basta instalar e digitar:
+
+```bash
+suapy
+```
+
+Isso abrirá uma interface interativa para ver seu boletim, horário e eventos sem precisar escrever uma linha de código.
+
 <details>
 <summary>🐼 Usando Pandas? Instale com o extra</summary>
 
@@ -37,7 +47,7 @@ pip install suapy[pandas]
 
 ---
 
-## 🚀 Primeiros passos
+## 🚀 Primeiros passos (Biblioteca)
 
 ```python
 from suapy import Suap
@@ -59,6 +69,16 @@ if provas:
 for d in suap.ensino.obter_diarios(2024, 1):
     print(f"• {d['disciplina']}: {d['numero_faltas']} faltas — {d['situacao']}")
 ```
+
+---
+
+## 🔄 Persistência de Sessão
+
+O CLI `suapy` gerencia sua sessão automaticamente para você não precisar digitar a senha toda vez.
+
+- **Onde fica salvo?** Em `~/.suapy/session.json`.
+- **Como funciona?** Ele guarda um _refresh token_. Ao abrir o app, ele tenta renovar o acesso. Se funcionar, você entra direto!
+- **Segurança:** Seus dados de login (senha) **não** são salvos, apenas o token de autorização.
 
 ---
 
