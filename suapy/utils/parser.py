@@ -2,8 +2,8 @@ import re
 
 def parse_horario(horario_str):
     """
-    Parses SUAP schedule strings like '2V34 / 4V56'.
-    Returns a list of dicts with day, shift, and slots.
+    Interpreta horários como '2V34 / 4V56'.
+    Retorna dia, turno e tempos de aula; ignora trechos inválidos.
     """
     if not horario_str:
         return []
@@ -32,7 +32,7 @@ def parse_horario(horario_str):
         # Match pattern: Day(s) Turn Slot(s)
         # Some are single days: 2V34
         # Some might be 23V12
-        match = re.match(r'([1-7]+)([MVN])([1-7]+)', part)
+        match = re.fullmatch(r'([1-7]+)([MVN])([1-7]+)', part)
         if match:
             dias_chars, turno_char, slots_chars = match.groups()
             for d in dias_chars:

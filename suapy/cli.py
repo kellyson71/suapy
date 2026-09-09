@@ -1,253 +1,186 @@
+"""Interface de terminal para consultas acadêmicas."""
+
+import argparse
+import getpass
+import json
+import os
+import tempfile
+from datetime import datetime
+from itertools import islice
+from pathlib import Path
+
 from rich.console import Console
 from rich.table import Table
-from rich.panel import Panel
-from rich.text import Text
-from rich.columns import Columns
-from suapy import Suap, parse_horario
-import getpass
-import sys
-import os
-import json
-from pathlib import Path
-from datetime import datetime
 
-console = Console()
+from suapy import Suap, SuapAuthError, SuapError, parse_horario
+
+console = Console(markup=False)
 SESSION_FILE = Path.home() / ".suapy" / "session.json"
 
+
 def save_session(refresh_token):
-    SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(SESSION_FILE, "w") as f:
-        json.dump({"refresh": refresh_token}, f)
+    """Grava atomicamente; em POSIX, pasta 700 e arquivo 600."""
+    SESSION_FILE.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    if os.name == "posix":
+        SESSION_FILE.parent.chmod(0o700)
+    fd, nome = tempfile.mkstemp(dir=SESSION_FILE.parent, prefix=".session-")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as arquivo:
+            json.dump({"refresh": refresh_token}, arquivo)
+        os.replace(nome, SESSION_FILE)
+    finally:
+        if os.path.exists(nome):
+            os.unlink(nome)
+
 
 def load_session():
-    if SESSION_FILE.exists():
-        try:
-            with open(SESSION_FILE, "r") as f:
-                data = json.load(f)
-                return data.get("refresh")
-        except:
-            return None
-    return None
+    try:
+        with SESSION_FILE.open(encoding="utf-8") as arquivo:
+            dados = json.load(arquivo)
+        token = dados.get("refresh") if isinstance(dados, dict) else None
+        return token if isinstance(token, str) and token.strip() else None
+    except (OSError, ValueError):
+        return None
 
-def print_header():
-    console.print(Panel.fit("[bold green]Suapy CLI[/bold green] - Central do Estudante IFRN", border_style="green"))
 
-def do_login(suap=None):
-    if not suap:
-        suap = Suap()
-    
-    usuario = console.input("[bold cyan]Matrícula SUAP:[/bold cyan] ")
-    senha = getpass.getpass("Senha: ")
-    
-    with console.status("Autenticando...", spinner="dots"):
-        try:
-            suap.login(usuario, senha)
-            save_session(suap.refresh_token)
-            meu_perfil = suap.usuario.obter_meus_dados_resumidos()
-            aluno = suap.ensino.obter_dados_aluno()
-            nome = meu_perfil.get('nome_usual') or meu_perfil.get('nome') or "Estudante"
-            console.print(f"\n✅ [bold green]Login bem-sucedido![/bold green] Olá, [bold]{nome}[/bold]")
-            console.print(f"Curso: {aluno.get('curso')}")
-            return suap, aluno
-        except Exception as e:
-            console.print(f"\n❌ [bold red]Erro ao logar:[/bold red] {e}")
-            sys.exit(1)
+def clear_session():
+    try:
+        SESSION_FILE.unlink()
+    except FileNotFoundError:
+        pass
+
 
 def escolher_periodo(suap):
-    periodos = suap.ensino.obter_periodos_letivos()
-    if not periodos or 'results' not in periodos:
-        console.print("[yellow]Nenhum período letivo encontrado.[/yellow]")
+    periodos = list(suap.iterar_resultados(suap.ensino.obter_periodos_letivos()))
+    periodos.sort(key=lambda p: (int(p["ano_letivo"]), int(p["periodo_letivo"])), reverse=True)
+    if not periodos:
+        console.print("Nenhum período letivo encontrado.")
         return None, None
-        
-    lista_periodos = periodos['results'][:4] # Pega os 4 mais recentes
-    
-    console.print("\n[bold cyan]Selecione o período letivo:[/bold cyan]")
-    for i, p in enumerate(lista_periodos):
-        console.print(f"{i + 1}. [blue]{p['ano_letivo']}.{p['periodo_letivo']}[/blue]")
-        
-    escolha = console.input("\nPeríodo (padrão 1): ")
-    idx = 0
-    if escolha.isdigit() and 1 <= int(escolha) <= len(lista_periodos):
-        idx = int(escolha) - 1
-        
-    p = lista_periodos[idx]
-    return p['ano_letivo'], p['periodo_letivo']
+    for i, p in enumerate(periodos, 1):
+        console.print(f"{i}. {p['ano_letivo']}.{p['periodo_letivo']}")
+    while True:
+        escolha = console.input("Período [1]: ").strip() or "1"
+        if escolha.isdigit() and 1 <= int(escolha) <= len(periodos):
+            p = periodos[int(escolha) - 1]
+            return p["ano_letivo"], p["periodo_letivo"]
+        console.print("Escolha um dos períodos da lista.")
+
 
 def mostrar_boletim_e_faltas(suap):
     ano, periodo = escolher_periodo(suap)
-    if not ano: return
-    
-    console.print(f"\n[bold blue]📚 Boletim e Faltas - Semestre {ano}.{periodo}[/bold blue]")
-    
-    table = Table(show_header=True, header_style="bold magenta")
-    table.add_column("Disciplina", ratio=3)
-    table.add_column("Média", justify="center")
-    table.add_column("Faltas", justify="center")
-    table.add_column("Situação")
-
-    with console.status("Buscando boletim...", spinner="dots"):
-        response = suap.ensino.obter_boletim(ano, periodo)
-        boletim = response.get('results', []) if isinstance(response, dict) else response
-        
-    if not boletim:
-        console.print("[yellow]Nenhum dado de boletim para este semestre.[/yellow]")
+    if ano is None:
         return
-        
-    for d in boletim:
-        faltas = d.get('numero_faltas', 0)
-        situacao = d.get('situacao', 'Cursando')
-        media = d.get('media_final_disciplina', '-')
-        
-        falta_color = "red" if faltas > 15 else "green"
-        table.add_row(
-            d.get('disciplina', 'N/A'),
-            str(media),
-            f"[{falta_color}]{faltas}[/{falta_color}]",
-            situacao
-        )
-        
-    console.print(table)
+    tabela = Table("Disciplina", "Média", "Faltas", "Situação")
+    for d in suap.iterar_resultados(suap.ensino.obter_boletim(ano, periodo)):
+        tabela.add_row(*(str(d.get(chave, "—")) for chave in
+                          ("disciplina", "media_final_disciplina", "numero_faltas", "situacao")))
+    console.print(tabela if tabela.row_count else "Nenhum boletim para este período.")
+
+
+def ordenar_horarios(horarios):
+    ordem = {"Manhã": 0, "Tarde": 1, "Noite": 2}
+    return sorted(horarios, key=lambda h: (ordem.get(h["turno"], 3), h["horarios"][0]))
+
 
 def mostrar_horario_hoje(suap):
     ano, periodo = escolher_periodo(suap)
-    if not ano: return
-    
-    hoje_fds = datetime.now().weekday() + 2 # 2=Segunda... 8=Domingo?
-    if hoje_fds > 7: hoje_fds = 1 
-    
-    dias_semana = {2: "Segunda", 3: "Terça", 4: "Quarta", 5: "Quinta", 6: "Sexta", 7: "Sábado", 1: "Domingo"}
-    nome_dia = dias_semana.get(hoje_fds)
-
-    console.print(f"\n[bold blue]📅 Horário de Hoje ({nome_dia})[/bold blue]")
-
-    with console.status("Buscando turmas...", spinner="dots"):
-        turmas = suap.ensino.obter_turmas_virtuais(ano, periodo)
-        if 'results' not in turmas: return
-
-    horario_hoje = []
-    for t in turmas['results']:
-        h_str = t.get('horarios_de_aula', '')
-        Parsed = parse_horario(h_str)
-        for h in Parsed:
-            if h['dia_num'] == hoje_fds:
-                horario_hoje.append({
-                    'disciplina': t.get('descricao'),
-                    'turno': h['turno'],
-                    'horarios': h['horarios'],
-                    'local': ", ".join(t.get('locais_de_aula', []))
-                })
-
-    if not horario_hoje:
-        console.print("[green]Nenhuma aula hoje! Aproveite.[/green]")
+    if ano is None:
         return
+    dia = (datetime.now().weekday() + 1) % 7 + 1
+    horarios = []
+    for turma in suap.iterar_resultados(suap.ensino.obter_turmas_virtuais(ano, periodo)):
+        for h in parse_horario(turma.get("horarios_de_aula", "")):
+            if h["dia_num"] == dia:
+                horarios.append(dict(h, disciplina=turma.get("descricao", "—"),
+                                     local=", ".join(turma.get("locais_de_aula") or [])))
+    tabela = Table("Turno", "Tempos de aula", "Disciplina", "Local")
+    for h in ordenar_horarios(horarios):
+        tabela.add_row(h["turno"], "-".join(map(str, h["horarios"])), h["disciplina"], h["local"])
+    console.print(tabela if tabela.row_count else "Nenhuma aula hoje.")
 
-    horario_hoje.sort(key=lambda x: (x['turno'], x['horarios'][0]))
-
-    table = Table(show_header=True, header_style="bold cyan")
-    table.add_column("Turno")
-    table.add_column("Horário")
-    table.add_column("Disciplina")
-    table.add_column("Local")
-
-    for h in horario_hoje:
-        slots = "-".join(map(str, h['horarios']))
-        table.add_row(h['turno'], slots, h['disciplina'], h['local'])
-    
-    console.print(table)
 
 def mostrar_eventos(suap):
-    console.print(f"\n[bold blue]📣 Eventos e Avisos Institucionais[/bold blue]")
-    with console.status("Buscando eventos...", spinner="dots"):
-        eventos = suap.ensino.obter_eventos()
-    
-    if not eventos or 'results' not in eventos or not eventos['results']:
-        console.print("[yellow]Nenhum evento recente.[/yellow]")
-        return
-        
-    for ev in eventos['results'][:5]:
-        title = ev.get('nome') or ev.get('titulo') or "Evento"
-        data = ev.get('data_inicio')
-        apresentacao = ev.get('apresentacao') or ev.get('descricao') or ""
-        console.print(Panel(f"{apresentacao}\n\n[bold]Data:[/bold] {data}", title=f"[bold]{title}[/bold]"))
+    eventos = list(islice(suap.iterar_resultados(suap.ensino.obter_eventos()), 5))
+    for evento in eventos:
+        console.print(evento.get("nome") or evento.get("titulo") or "Evento")
+        console.print(str(evento.get("data_inicio", "")))
+        console.print(evento.get("apresentacao") or evento.get("descricao") or "")
+    if not eventos:
+        console.print("Nenhum evento disponível.")
+
 
 def detalhar_progresso(suap):
-    console.print(f"\n[bold blue]🎓 Progresso do Curso[/bold blue]")
-    with console.status("Buscando progresso...", spinner="dots"):
-        reqs = suap.ensino.obter_requisitos_conclusao()
-    
-    if not reqs:
-        console.print("Dados indisponíveis.")
+    requisitos = suap.ensino.obter_requisitos_conclusao()
+    if not requisitos:
+        console.print("Progresso indisponível.")
         return
+    console.print(f"Progresso do curso: {requisitos.get('percentual_cumprida', '—')}%")
+    tabela = Table("Tipo", "Exigido", "Cumprido", "Pendente")
+    for nome, dados in requisitos.items():
+        if isinstance(dados, dict) and "ch_esperada" in dados:
+            tabela.add_row(nome.replace("_", " "), *(str(dados.get(c, "—")) for c in
+                            ("ch_esperada", "ch_cumprida", "ch_pendente")))
+    console.print(tabela)
 
-    perc = reqs.get('percentual_cumprida', '0')
-    console.print(f"Progresso Geral: [bold green]{perc}%[/bold green]")
-    
-    table = Table(title="Carga Horária")
-    table.add_column("Tipo")
-    table.add_column("Exigido")
-    table.add_column("Cumprido")
-    table.add_column("Pendente")
-
-    for key, val in reqs.items():
-        if isinstance(val, dict) and 'ch_esperada' in val:
-            name = key.replace('_', ' ').title()
-            table.add_row(name, f"{val['ch_esperada']}h", f"{val['ch_cumprida']}h", f"{val['ch_pendente']}h")
-            
-    console.print(table)
 
 def menu(suap):
+    acoes = {"1": mostrar_boletim_e_faltas, "2": mostrar_horario_hoje,
+             "3": detalhar_progresso, "4": mostrar_eventos}
     while True:
-        console.print("\n[bold cyan]O que deseja fazer?[/bold cyan]")
-        console.print("1. [blue]Resumo Completo (Faltas e Notas)[/blue]")
-        console.print("2. [magenta]Ver Horário de Hoje[/magenta]")
-        console.print("3. [yellow]Progresso do Curso (Horas)[/yellow]")
-        console.print("4. [green]Eventos e Avisos[/green]")
-        console.print("0. [red]Sair[/red]")
-        
-        op = console.input("\nEscolha uma opção: ")
-        
+        console.print("\n1. Boletim e faltas\n2. Horário de hoje\n3. Progresso do curso"
+                      "\n4. Eventos\n5. Encerrar sessão e sair\n0. Sair (manter sessão)")
+        opcao = console.input("Opção: ").strip()
+        if opcao == "0":
+            return
+        if opcao == "5":
+            clear_session()
+            suap.logout()
+            console.print("Sessão removida deste computador.")
+            return
+        if opcao not in acoes:
+            console.print("Opção inválida.")
+            continue
         try:
-            if op == "1":
-                mostrar_boletim_e_faltas(suap)
-            elif op == "2":
-                mostrar_horario_hoje(suap)
-            elif op == "3":
-                detalhar_progresso(suap)
-            elif op == "4":
-                mostrar_eventos(suap)
-            elif op == "0":
-                console.print("Saindo... Bons estudos! 🤓")
-                break
-            else:
-                console.print("[red]Opção inválida.[/red]")
-        except Exception as e:
-            console.print(f"[red]Erro na operação:[/red] {e}")
+            acoes[opcao](suap)
+        except SuapError as exc:
+            console.print(f"Erro: {exc}")
+        finally:
+            if suap.refresh_token:
+                save_session(suap.refresh_token)
+
 
 def main():
-    print_header()
-    suap = Suap()
-    refresh_token = load_session()
-    login_ok = False
-    nome = "Estudante"
-    
-    if refresh_token:
-        with console.status("Validando sessão anterior...", spinner="dots"):
-            try:
-                suap.refresh_token = refresh_token
-                suap.renovar_token()
-                meu_perfil = suap.usuario.obter_meus_dados_resumidos()
-                nome = meu_perfil.get('nome_usual') or meu_perfil.get('nome') or "Estudante"
-                login_ok = True
-            except Exception:
-                console.print("[yellow]Sessão expirada. Por favor, faça login novamente.[/yellow]")
-    
-    if login_ok:
-        console.print(f"\n✅ [bold green]Sessão restaurada![/bold green] Bem-vindo de volta, [bold]{nome}[/bold]")
-        menu(suap)
-        return
-    
-    suap, aluno = do_login(suap)
-    menu(suap)
+    parser = argparse.ArgumentParser(description="Consulte o SUAP do IFRN pelo terminal.")
+    parser.add_argument("--logout", action="store_true", help="remove a sessão local e sai")
+    args = parser.parse_args()
+    try:
+        if args.logout:
+            clear_session()
+            console.print("Sessão local removida.")
+            return
+        console.print("Suapy · SUAP do IFRN")
+        with Suap() as suap:
+            suap.refresh_token = load_session()
+            if suap.refresh_token:
+                try:
+                    suap.renovar_token()
+                    save_session(suap.refresh_token)
+                except SuapAuthError:
+                    clear_session()
+                    suap.logout()
+                    console.print("Sessão expirada. Entre novamente.")
+            if not suap.token:
+                usuario = console.input("Matrícula: ")
+                senha = getpass.getpass("Senha: ")
+                suap.login(usuario, senha)
+                save_session(suap.refresh_token)
+            menu(suap)
+    except (KeyboardInterrupt, EOFError):
+        console.print("\nEncerrado.")
+    except (SuapError, OSError) as exc:
+        console.print(f"Erro: {exc}")
+        raise SystemExit(1) from exc
+
 
 if __name__ == "__main__":
     main()

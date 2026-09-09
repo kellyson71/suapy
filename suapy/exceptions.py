@@ -1,5 +1,5 @@
 class SuapError(Exception):
-    """Exceção base para a biblioteca suap_lib."""
+    """Exceção base da biblioteca suapy."""
     pass
 
 class SuapAuthError(SuapError):

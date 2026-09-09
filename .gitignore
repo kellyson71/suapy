@@ -12,3 +12,7 @@ dist/
 .env
 .DS_Store
 doc/
+/.private/
+.pytest_cache/
+.coverage
+htmlcov/

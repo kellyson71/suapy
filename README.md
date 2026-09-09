@@ -1,131 +1,197 @@
-<div align="center">
+<p align="center">
+  <img src="https://raw.githubusercontent.com/kellyson71/suapy/main/assets/suapy-logo.png" alt="Suapy — biblioteca Python para a API do SUAP" width="520">
+</p>
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=32&pause=1000&color=2E9E4F&center=true&vCenter=true&width=500&lines=Suapy+%F0%9F%90%8D;Seu+SUAP%2C+em+Python%2C+em+portugu%C3%AAs." alt="Typing SVG" />
+# Suapy
 
-**A biblioteca Python feita para estudantes brasileiros que usam o SUAP.**  
-Acesse faltas, notas, provas e muito mais — com código limpo e em português.
+Consulte boletim, faltas, horários e avaliações do SUAP com Python ou pelo terminal.
+Os métodos são em português e usam a API do IFRN por padrão. Outras instituições
+podem ter endpoints ou permissões diferentes; a compatibilidade não é garantida.
 
-[![PyPI version](https://img.shields.io/pypi/v/suapy?color=2e9e4f&style=flat-square&label=suapy)](https://pypi.org/project/suapy/)
-[![Python](https://img.shields.io/pypi/pyversions/suapy?style=flat-square&color=3572A5)](https://python.org)
-[![License](https://img.shields.io/pypi/l/suapy?style=flat-square&color=orange)](LICENSE)
-[![Downloads](https://img.shields.io/pypi/dm/suapy?style=flat-square&color=blueviolet)](https://pypi.org/project/suapy/)
+[PyPI](https://pypi.org/project/suapy/) ·
+[Código-fonte](https://github.com/kellyson71/suapy) ·
+[Relatar problema](https://github.com/kellyson71/suapy/issues)
 
-</div>
+## Instalação
 
----
-
-## ✨ Por que o Suapy?
-
-> Você quer saber **quantas faltas** tem antes de reprovar. Quer ver **quando é sua próxima prova**. Quer jogar suas notas num DataFrame do Pandas e entender de vez o semestre. O Suapy faz isso tudo — em português, com poucas linhas.
-
----
-
-## 📦 Instalação
+Requer Python 3.10 ou superior. A versão 1.4 passa a exigir esse mínimo.
 
 ```bash
-pip install suapy
+python -m pip install suapy
 ```
 
-### 💻 Usando o Terminal
+Para usar a conversão de dados com Pandas:
+
+```bash
+python -m pip install "suapy[pandas]"
+```
+
+## Pelo terminal
 
 ```bash
 suapy
-
 ```
 
-Isso abrirá uma interface interativa para ver seu boletim, horário e eventos sem precisar escrever uma linha de código.
+Informe sua matrícula e senha. O menu permite consultar boletim e faltas,
+horário do dia, progresso do curso e eventos. A senha não aparece enquanto você digita.
 
-<details>
-<summary>🐼 Usando Pandas? Instale com o extra</summary>
+O terminal guarda um refresh token em `~/.suapy/session.json` para restaurar o
+acesso. Esse arquivo contém uma credencial em texto simples, embora não contenha
+sua senha. Em sistemas POSIX, a pasta tem permissão `700` e o arquivo `600`;
+em outros sistemas, o acesso depende das permissões da conta e do diretório.
+
+A opção **Sair** mantém a sessão. Para removê-la deste computador, use a opção
+**Encerrar sessão e sair** ou execute:
 
 ```bash
-pip install suapy[pandas]
+suapy --logout
 ```
 
-</details>
+Isso remove o token local; não o revoga no servidor.
 
----
+## Em Python
 
-## 🚀 Primeiros passos (Biblioteca)
+O exemplo consulta os períodos disponíveis e busca o boletim do mais recente.
+A senha é solicitada no terminal, sem ficar escrita no código.
+
+```python
+from getpass import getpass
+from suapy import Suap, SuapError
+
+try:
+    with Suap() as suap:
+        suap.login(input("Matrícula: "), getpass("Senha: "))
+
+        periodos = list(suap.iterar_resultados(
+            suap.ensino.obter_periodos_letivos()
+        ))
+        if periodos:
+            atual = max(periodos, key=lambda p: (
+                int(p["ano_letivo"]), int(p["periodo_letivo"])
+            ))
+            resposta = suap.ensino.obter_boletim(
+                atual["ano_letivo"], atual["periodo_letivo"]
+            )
+            for disciplina in suap.iterar_resultados(resposta):
+                print(
+                    disciplina.get("disciplina", "Sem nome"),
+                    "— faltas:", disciplina.get("numero_faltas", "—"),
+                    "— média:", disciplina.get("media_final_disciplina", "—"),
+                )
+        else:
+            print("Nenhum período letivo disponível.")
+except SuapError as erro:
+    print(f"Não foi possível consultar o SUAP: {erro}")
+```
+
+O bloco `with` fecha as conexões ao terminar. Sem ele, chame `suap.fechar()`.
+A biblioteca mantém tokens somente em memória; a gravação em disco é uma função do CLI.
+
+## Consultas disponíveis
+
+Os retornos dependem do perfil da conta e dos dados cadastrados na instituição.
+
+| Método de `suap.ensino` | Consulta |
+| --- | --- |
+| `obter_dados_aluno()` | Dados institucionais do aluno |
+| `obter_periodos_letivos()` | Períodos disponíveis para consulta |
+| `obter_boletim(ano, periodo)` | Notas, faltas e situação por disciplina |
+| `obter_proximas_avaliacoes()` | Avaliações cadastradas |
+| `obter_turmas_virtuais(ano, periodo)` | Turmas, horários e locais de aula |
+| `obter_turma_virtual(pk)` | Detalhes de uma turma |
+| `obter_mensagens_aluno(status="nao_lidas")` | Mensagens: `nao_lidas`, `lidas` ou `todas` |
+| `obter_requisitos_conclusao()` | Progresso e carga horária do curso |
+| `obter_eventos()` | Eventos institucionais |
+| `obter_diarios(ano=None, periodo=None)` | Diários; pode exigir perfil de professor |
+
+Para faltas e notas de alunos, use `obter_boletim()`. A biblioteca também expõe
+os módulos `usuario`, `infraestrutura` e `pesquisa_extensao`; consulte os
+[métodos no código](https://github.com/kellyson71/suapy/tree/main/suapy/modules).
+
+## Respostas e paginação
+
+Os métodos devolvem o JSON da API sem alterar sua estrutura. Uma consulta pode
+retornar uma lista, um objeto ou uma página com `results` e `next`.
+
+Para uma consulta de listagem, `suap.iterar_resultados(resposta)` aceita tanto
+listas quanto páginas e busca as páginas seguintes conforme você itera.
+Objetos de detalhe, como os dados do aluno, devem ser usados diretamente.
+
+```python
+# Com suap já autenticado:
+resposta = suap.ensino.obter_proximas_avaliacoes()
+for avaliacao in suap.iterar_resultados(resposta):
+    print(avaliacao.get("disciplina"), avaliacao.get("data_avaliacao"))
+```
+
+O iterador rejeita links de outra origem e ciclos de paginação. Ele não ordena
+os registros; a primeira avaliação recebida não é necessariamente a próxima por data.
+
+## Análise com Pandas
+
+```python
+import pandas as pd
+from suapy import para_dataframe
+
+# Com suap autenticado e ano/periodo escolhidos:
+resposta = suap.ensino.obter_boletim(ano, periodo)
+df = para_dataframe(list(suap.iterar_resultados(resposta)))
+
+if "media_final_disciplina" in df.columns:
+    notas = pd.to_numeric(df["media_final_disciplina"], errors="coerce")
+    if notas.notna().any():
+        print(f"Média simples das notas disponíveis: {notas.mean():.2f}")
+```
+
+Essa média não representa necessariamente o índice acadêmico da instituição.
+Para converter apenas uma página envelopada, use
+`para_dataframe(resposta, chave="results")`. A conversão não busca outras páginas.
+O Pandas só é importado quando essa função é chamada.
+
+## Horários
+
+```python
+from suapy import parse_horario
+
+for aula in parse_horario("2V34 / 4V56"):
+    print(aula["dia_semana"], aula["turno"], aula["horarios"])
+# Segunda Tarde [3, 4]
+# Quarta Tarde [5, 6]
+```
+
+Os números indicam tempos de aula, não horas do relógio. Os horários exatos
+dependem do campus. Trechos que não correspondem ao formato são ignorados.
+
+## Conexão e erros
 
 ```python
 from suapy import Suap
 
-suap = Suap()
-suap.login("20201014040001", "sua_senha")
-
-# 👤 Quem sou eu?
-aluno = suap.ensino.obter_dados_aluno()
-print(f"E aí, {aluno['nome_usual']}! 👋")
-
-# 📅 Próxima prova
-provas = suap.ensino.obter_proximas_avaliacoes()
-if provas:
-    p = provas[0]
-    print(f"📌 Prova de {p['disciplina']} em {p['data_avaliacao']}")
-
-# 📋 Situação das matérias
-for d in suap.ensino.obter_diarios(2024, 1):
-    print(f"• {d['disciplina']}: {d['numero_faltas']} faltas — {d['situacao']}")
+suap = Suap(
+    url_base="https://suap.ifrn.edu.br",
+    timeout=(5, 30),  # conexão e espera de leitura, em segundos
+)
+suap.fechar()
 ```
 
----
+A verificação TLS fica habilitada. Redirecionamentos HTTP não são seguidos.
+Ao receber `401`, o cliente tenta renovar o token e repetir a chamada uma vez,
+se houver refresh token. Não há repetição automática para falhas de rede.
 
-## 🔄 Persistência de Sessão
+| Exceção | Situação |
+| --- | --- |
+| `SuapAuthError` | Autenticação inválida, token ausente ou acesso negado (`401`/`403`) |
+| `SuapApiError` | Outros erros HTTP, JSON inválido ou paginação inválida |
+| `SuapError` | Classe base; também cobre timeout e falha de conexão |
 
-O CLI `suapy` gerencia sua sessão automaticamente para você não precisar digitar a senha toda vez.
+Capture as exceções específicas antes de `SuapError` quando precisar distinguir
+as causas. `SuapApiError` disponibiliza `status_code` e `response` quando aplicáveis.
 
-- **Onde fica salvo?** Em `~/.suapy/session.json`.
-- **Como funciona?** Ele guarda um _refresh token_. Ao abrir o app, ele tenta renovar o acesso. Se funcionar, você entra direto!
-- **Segurança:** Seus dados de login (senha) **não** são salvos, apenas o token de autorização.
+## Desenvolvimento
 
----
+Veja o [guia de contribuição](https://github.com/kellyson71/suapy/blob/main/CONTRIBUTING.md)
+para instalar o projeto, executar os testes e preparar uma distribuição.
+As mudanças estão no [changelog](https://github.com/kellyson71/suapy/blob/main/CHANGELOG.md).
 
-## 🎒 O que você pode fazer com `suap.ensino`
-
-| Função                            | O que retorna                                         |
-| --------------------------------- | ----------------------------------------------------- |
-| `obter_dados_aluno()`             | Matrícula, curso, cotas e contatos                    |
-| `obter_diarios(ano, periodo)`     | Faltas, notas e situação por disciplina               |
-| `obter_boletim(ano, periodo)`     | Médias finais e carga horária                         |
-| `obter_proximas_avaliacoes()`     | Datas de provas e trabalhos cadastrados               |
-| `obter_mensagens_aluno()`         | Recados do SUAP (`'lidas'`, `'nao_lidas'`, `'todas'`) |
-| `obter_turmas_virtuais(ano, per)` | Links e participantes da turma virtual                |
-| `obter_requisitos_conclusao()`    | Horas e matérias que faltam para formar               |
-
----
-
-## 📊 Analisando suas notas com Pandas
-
-```python
-from suapy import para_dataframe
-
-boletim = suap.ensino.obter_boletim(2024, 1)
-df = para_dataframe(boletim)
-
-media = df['media_final_disciplina'].astype(float).mean()
-print(f"📈 Sua média geral: {media:.2f}")
-```
-
----
-
-## 🔐 Tratando erros de login
-
-```python
-from suapy import Suap, SuapAuthError
-
-try:
-    suap.login("usuario", "senha_errada")
-except SuapAuthError:
-    print("❌ Usuário ou senha incorretos.")
-```
-
----
-
-<div align="center">
-
-Feito com 💚 para os estudantes do **IF** e de todas as instituições que usam o **SUAP**
-
-_Não é afiliado ao IFRN nem ao projeto SUAP oficial._
-
-</div>
+Projeto independente, sem afiliação oficial ao IFRN ou ao SUAP.
+Distribuído sob a [licença MIT](https://github.com/kellyson71/suapy/blob/main/LICENSE).
