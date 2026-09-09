@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "suapy"
-version = "1.4.0"
+version = "1.4.1"
 description = "Cliente Python e interface de terminal para a API do SUAP."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -32,6 +32,7 @@ dev = ["pytest>=7", "build>=1", "twine>=6"]
 suapy = "suapy.cli:main"
 
 [project.urls]
+Documentation = "https://kellyson71.github.io/suapy/"
 Repository = "https://github.com/kellyson71/suapy"
 Issues = "https://github.com/kellyson71/suapy/issues"
 Changelog = "https://github.com/kellyson71/suapy/blob/main/CHANGELOG.md"

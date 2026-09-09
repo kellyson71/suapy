@@ -1,5 +1,6 @@
 name: Publish to PyPI
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
@@ -11,7 +12,22 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check-auth:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Test PyPI authentication without upload
+        run: python scripts/check_pypi_auth.py
   test:
+    if: github.event_name == 'release'
     uses: ./.github/workflows/ci.yml
   build:
     needs: test

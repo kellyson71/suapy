@@ -1,6 +1,15 @@
 # Alterações
 
-## 1.4.0 — em preparação
+## 1.4.1 — em preparação
+
+- Prefixos de instalação preservados nos endpoints; paginação relativa à URL consultada.
+- Validação de ano, período e status de mensagens antes das chamadas HTTP.
+- Consultas diretas no CLI, exportação CSV/JSON e modo sem persistência de sessão.
+- URLs alternativas no CLI sem reutilizar a sessão do IFRN.
+- Teste opt-in com conta real e diagnóstico OIDC sem upload via execução manual.
+- Página de documentação responsiva e workflow para GitHub Pages.
+
+## 1.4.0 — 2026-09-09
 
 - Python mínimo passa de 3.6 para 3.10; metadados migrados para pyproject.toml.
 - Timeout de conexão/leitura, validação dos tokens e suporte a refresh token rotativo.

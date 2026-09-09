@@ -12,6 +12,12 @@ podem ter endpoints ou permissões diferentes; a compatibilidade não é garanti
 [Código-fonte](https://github.com/kellyson71/suapy) ·
 [Relatar problema](https://github.com/kellyson71/suapy/issues)
 
+[Documentação completa](https://kellyson71.github.io/suapy/) ·
+[Fonte da documentação](https://github.com/kellyson71/suapy/tree/main/docs)
+
+As funcionalidades novas abaixo fazem parte da 1.4.1 em preparação. Até sua
+publicação, instale o código do repositório para experimentá-las.
+
 ## Instalação
 
 Requer Python 3.10 ou superior. A versão 1.4 passa a exigir esse mínimo.
@@ -31,6 +37,22 @@ python -m pip install "suapy[pandas]"
 ```bash
 suapy
 ```
+
+Consultas diretas e exportações (1.4.1):
+
+```bash
+suapy periodos
+suapy boletim --ano 2026 --periodo 2
+suapy boletim --ano 2026 --periodo 2 --formato csv --saida boletim.csv
+suapy avaliacoes --formato json
+suapy mensagens --status todas --formato json
+suapy --sem-sessao
+```
+
+`--sem-sessao` não lê nem modifica o token salvo. `--saida` cria um arquivo novo,
+sem sobrescrever exportações. CSV e JSON não precisam de Pandas. Avisos e prompts
+usam stderr; os dados exportados usam stdout ou o arquivo escolhido.
+`--url-base` permite outra instituição, sem reutilizar a sessão salva do IFRN.
 
 Informe sua matrícula e senha. O menu permite consultar boletim e faltas,
 horário do dia, progresso do curso e eventos. A senha não aparece enquanto você digita.
@@ -113,6 +135,11 @@ os módulos `usuario`, `infraestrutura` e `pesquisa_extensao`; consulte os
 Os métodos devolvem o JSON da API sem alterar sua estrutura. Uma consulta pode
 retornar uma lista, um objeto ou uma página com `results` e `next`.
 
+Na 1.4.1, páginas são dicionários que também preservam a URL original em um
+atributo, para resolver links relativos como `?page=2`. Para um JSON externo,
+use `iterar_resultados(resposta, url_origem="https://servidor/api/lista/")`.
+Prefixos de instalação em `url_base`, como `/suap`, são preservados nos endpoints.
+
 Para uma consulta de listagem, `suap.iterar_resultados(resposta)` aceita tanto
 listas quanto páginas e busca as páginas seguintes conforme você itera.
 Objetos de detalhe, como os dados do aluno, devem ser usados diretamente.
@@ -180,6 +207,7 @@ se houver refresh token. Não há repetição automática para falhas de rede.
 
 | Exceção | Situação |
 | --- | --- |
+| `ValueError` | Ano/período, status de mensagem ou URL base inválidos |
 | `SuapAuthError` | Autenticação inválida, token ausente ou acesso negado (`401`/`403`) |
 | `SuapApiError` | Outros erros HTTP, JSON inválido ou paginação inválida |
 | `SuapError` | Classe base; também cobre timeout e falha de conexão |

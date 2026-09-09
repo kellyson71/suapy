@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Documentação do Suapy: consulte a API do SUAP em Python, use o terminal e exporte boletins em CSV ou JSON.">
+  <title>Suapy — Documentação</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+<div class="layout">
+  <aside>
+    <a class="wordmark" href="#inicio">suapy</a>
+    <span class="version">DOCUMENTAÇÃO · 1.4.1</span>
+    <nav aria-label="Seções da documentação">
+      <p class="group">Comece aqui</p>
+      <a href="#instalacao">Instalação</a><a href="#terminal">Pelo terminal</a><a href="#python">Em Python</a>
+      <p class="group">Uso diário</p>
+      <a href="#exportacao">Exportar dados</a><a href="#sessao">Login e sessão</a><a href="#paginacao">URLs e paginação</a>
+      <p class="group">Referência</p>
+      <a href="#api">Métodos da API</a><a href="#erros">Erros e validação</a><a href="#testes">Testes</a><a href="#publicacao">Publicação</a>
+    </nav>
+  </aside>
+  <main id="conteudo">
+    <div class="topline"><span>Python · API do SUAP</span><span><a href="https://github.com/kellyson71/suapy">GitHub</a> &nbsp;/&nbsp; <a href="https://pypi.org/project/suapy/">PyPI</a></span></div>
+    <header id="inicio">
+      <img class="brand" src="assets/suapy-logo.png" alt="Suapy, biblioteca Python para a API do SUAP" width="1448" height="1086">
+      <h1>Seus dados acadêmicos,<br>em Python ou no terminal.</h1>
+      <p class="lead">Consulte notas, faltas, avaliações e horários. Use os métodos em português ou exporte os registros para trabalhar com eles em uma planilha.</p>
+      <p>O cliente usa o SUAP do IFRN por padrão. Outras instituições podem ter APIs e permissões diferentes. Este é um projeto independente.</p>
+      <p class="note">Esta página descreve a 1.4.1. Enquanto ela não estiver no PyPI, instale o código do repositório para usar os novos comandos.</p>
+    </header>
+    <section id="instalacao">
+      <h2>Instalação</h2><p>Use Python 3.10 ou superior. Em um ambiente virtual:</p>
+      <pre><code>python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade suapy</code></pre>
+      <p>No Windows, ative com <code>.venv\Scripts\activate</code>. Para conversão em DataFrame, instale <code>python -m pip install "suapy[pandas]"</code>. CSV e JSON não precisam de Pandas.</p>
+      <h3>Versão do repositório</h3>
+      <pre><code>git clone https://github.com/kellyson71/suapy.git
+cd suapy
+python -m pip install -e ".[dev,pandas]"</code></pre>
+    </section>
+    <section id="terminal">
+      <h2>Pelo terminal</h2><p>Execute <code>suapy</code> para abrir o menu interativo. Para uma consulta direta, use um dos comandos abaixo. Quando necessário, o terminal solicita matrícula e senha.</p>
+      <pre><code>suapy periodos
+suapy boletim --ano 2026 --periodo 2
+suapy turmas --ano 2026 --periodo 2
+suapy avaliacoes
+suapy mensagens --status nao_lidas
+suapy progresso</code></pre>
+      <p>Escolha ano e período a partir de <code>suapy periodos</code>; os valores do exemplo não garantem que existam registros na sua conta. Use <code>suapy --help</code> ou <code>suapy boletim --help</code> para ver as opções.</p>
+      <div class="table-wrap"><table><thead><tr><th>Opção</th><th>Uso</th></tr></thead><tbody>
+      <tr><td><code>--formato tabela|json|csv</code></td><td>Formato da consulta; o padrão é tabela.</td></tr>
+      <tr><td><code>--saida arquivo</code></td><td>Cria um arquivo JSON ou CSV; não sobrescreve arquivos existentes.</td></tr>
+      <tr><td><code>--sem-sessao</code></td><td>Não acessa o token salvo no computador.</td></tr>
+      <tr><td><code>--url-base URL</code></td><td>Seleciona outra instituição, inclusive uma URL com prefixo como <code>/suap</code>.</td></tr>
+      </tbody></table></div>
+    </section>
+    <section id="python">
+      <h2>Em Python</h2><p>Autentique e selecione o período mais recente informado pela API:</p>
+      <pre><code>from getpass import getpass
+from suapy import Suap, SuapError
+
+try:
+    with Suap(timeout=(5, 30)) as suap:
+        suap.login(input("Matrícula: "), getpass("Senha: "))
+        periodos = list(suap.iterar_resultados(
+            suap.ensino.obter_periodos_letivos()
+        ))
+        if periodos:
+            atual = max(periodos, key=lambda p: (
+                int(p["ano_letivo"]), int(p["periodo_letivo"])
+            ))
+            boletim = suap.ensino.obter_boletim(
+                atual["ano_letivo"], atual["periodo_letivo"]
+            )
+            for disciplina in suap.iterar_resultados(boletim):
+                print(disciplina.get("disciplina"),
+                      disciplina.get("numero_faltas"))
+except SuapError as erro:
+    print(f"Consulta indisponível: {erro}")</code></pre>
+      <p>O bloco <code>with</code> libera conexões HTTP. Se não usá-lo, chame <code>suap.fechar()</code>. A biblioteca mantém credenciais somente em memória.</p>
+    </section>
+    <section id="exportacao">
+      <h2>Exportar dados</h2><p>As consultas de listagem incluem todas as páginas. Avisos e prompts usam stderr; JSON e CSV usam stdout ou o arquivo escolhido.</p>
+      <pre><code>suapy boletim --ano 2026 --periodo 2 --formato csv --saida boletim.csv
+suapy avaliacoes --formato json &gt; avaliacoes.json
+suapy mensagens --status todas --formato json --saida mensagens.json</code></pre>
+      <p>Arquivos de <code>--saida</code> são criados com acesso restrito em POSIX. Uma redireção com <code>&gt;</code> usa as permissões do shell e pode sobrescrever arquivos.</p>
+      <p>JSON preserva objetos e listas. No CSV, as colunas reúnem as chaves dos registros, valores aninhados viram JSON e campos ausentes ficam vazios. Textos que poderiam ser interpretados como fórmulas recebem um apóstrofo inicial.</p>
+      <h3>Com Pandas</h3>
+      <pre><code>import pandas as pd
+from suapy import para_dataframe
+
+# Com suap autenticado e ano/periodo selecionados:
+resposta = suap.ensino.obter_boletim(ano, periodo)
+df = para_dataframe(list(suap.iterar_resultados(resposta)))
+if "media_final_disciplina" in df.columns:
+    notas = pd.to_numeric(df["media_final_disciplina"], errors="coerce")
+    if notas.notna().any():
+        print(notas.mean())</code></pre>
+      <p>Essa é uma média simples das notas disponíveis, não necessariamente o índice acadêmico oficial.</p>
+    </section>
+    <section id="sessao">
+      <h2>Login e sessão</h2><p>O CLI do IFRN salva um refresh token em <code>~/.suapy/session.json</code>. A senha não é gravada. O token é uma credencial em texto simples; em POSIX, a pasta usa permissão 700 e o arquivo 600.</p>
+      <pre><code>suapy --sem-sessao
+suapy boletim --ano 2026 --periodo 2 --sem-sessao
+suapy --logout</code></pre>
+      <p><code>--sem-sessao</code> ignora a sessão existente e não a modifica, mesmo ao sair. <code>--logout</code> remove o arquivo local; não revoga o token no servidor. As duas opções não podem ser combinadas.</p>
+      <p>Uma <code>--url-base</code> alternativa não lê nem grava a sessão do IFRN. Você autentica naquela instituição durante a execução.</p>
+      <p>O cliente renova o acesso após um HTTP 401 e repete a chamada uma vez. Falhas de conexão não provocam novas tentativas automáticas.</p>
+    </section>
+    <section id="paginacao">
+      <h2>URLs e paginação</h2><p>Um prefixo na URL base é preservado nos endpoints do cliente:</p>
+      <pre><code>suap = Suap(url_base="https://instituicao.example/suap")
+# obter_boletim(2026, 2) consulta:
+# https://instituicao.example/suap/api/ensino/meu-boletim/2026/2/</code></pre>
+      <p>Listas e objetos continuam sendo usados como JSON. Páginas com <code>results</code> são dicionários com um atributo interno para a URL de origem; os campos do JSON não são alterados. Assim, um <code>next</code> como <code>?page=2</code> é resolvido contra a URL consultada.</p>
+      <p>Para páginas carregadas de outro lugar, informe a URL de origem se o link seguinte for relativo:</p>
+      <pre><code>pagina = {"results": [], "next": "?page=2"}
+registros = suap.iterar_resultados(
+    pagina,
+    url_origem="https://instituicao.example/suap/api/lista/"
+)</code></pre>
+      <p>Links absolutos e relativos à raiz seguem a semântica da URL retornada pelo servidor. Links externos e ciclos são rejeitados. O iterador é incremental, mas cada página é carregada em memória. A exportação do CLI reúne todos os registros antes de escrever.</p>
+    </section>
+    <section id="api">
+      <h2>Métodos da API</h2><p>Todos os métodos dependem dos endpoints e das permissões da instituição.</p>
+      <div class="table-wrap"><table><thead><tr><th>Módulo</th><th>Métodos</th></tr></thead><tbody>
+      <tr><td><code>ensino</code></td><td><code>obter_dados_aluno()</code>, <code>obter_periodos_letivos()</code>, <code>obter_boletim(ano, periodo)</code>, <code>obter_turmas_virtuais(ano, periodo)</code>, <code>obter_turma_virtual(pk)</code>, <code>obter_proximas_avaliacoes()</code>, <code>obter_mensagens_aluno(status)</code>, <code>obter_requisitos_conclusao()</code>, <code>obter_eventos()</code>, <code>obter_horario_aulas()</code>, <code>obter_diarios(ano=None, periodo=None)</code>.</td></tr>
+      <tr><td><code>usuario</code></td><td><code>obter_meus_dados_resumidos()</code>, <code>obter_meus_dados()</code>, <code>obter_historico_funcional()</code>, <code>obter_contracheques()</code>, <code>obter_contracheque_detalhado(ano, mes)</code>.</td></tr>
+      <tr><td><code>infraestrutura</code></td><td><code>obter_campi()</code>, <code>obter_setores()</code>.</td></tr>
+      <tr><td><code>pesquisa_extensao</code></td><td><code>obter_projetos_pesquisa()</code>, <code>obter_projetos_extensao()</code>.</td></tr>
+      </tbody></table></div>
+      <p>Para notas e faltas de alunos, use boletim. Diários podem exigir perfil de professor. Métodos funcionais podem exigir vínculo de servidor.</p>
+      <h3>Interpretar horários</h3><pre><code>from suapy import parse_horario
+print(parse_horario("2V34 / 4V56"))</code></pre>
+      <p>O retorno contém <code>dia_semana</code>, <code>dia_num</code>, <code>turno</code> e <code>horarios</code>. O número 2 representa segunda-feira; V representa tarde. Os números 3 e 4 representam tempos de aula, não horas do relógio.</p>
+    </section>
+    <section id="erros">
+      <h2>Erros e validação</h2>
+      <div class="table-wrap"><table><thead><tr><th>Exceção</th><th>Quando ocorre</th></tr></thead><tbody>
+      <tr><td><code>ValueError</code></td><td>URL base inválida; ano que não tem quatro dígitos; período não positivo; argumentos parciais de diários; status de mensagem desconhecido.</td></tr>
+      <tr><td><code>SuapAuthError</code></td><td>Tokens inválidos ou respostas HTTP 401/403.</td></tr>
+      <tr><td><code>SuapApiError</code></td><td>Outros erros HTTP, JSON inválido ou paginação incompatível.</td></tr>
+      <tr><td><code>SuapError</code></td><td>Classe base e erros de conexão/timeout.</td></tr>
+      </tbody></table></div>
+      <p>A validação de ano/período se aplica a boletim, turmas e diários. Aceita inteiros e strings decimais; rejeita booleanos. Não limita o período a dois semestres: consulte os períodos disponíveis na instituição.</p>
+      <p>No CLI, erro de argumentos retorna código 2, erro de execução retorna 1 e interrupção retorna 130. Consultas concluídas retornam 0.</p>
+    </section>
+    <section id="testes">
+      <h2>Testes</h2><p>Os testes padrão simulam a API e não acessam uma conta:</p>
+      <pre><code>python -m pip install -e ".[dev,pandas]"
+python -m pytest -q</code></pre>
+      <h3>Uma conta real de teste</h3><p>Em Bash, forneça as credenciais sem gravar a senha no histórico:</p>
+      <pre><code>read -r -p "Matrícula de teste: " SUAP_TEST_USERNAME
+read -r -s -p "Senha de teste: " SUAP_TEST_PASSWORD
+export SUAP_TEST_USERNAME SUAP_TEST_PASSWORD
+python scripts/test_live.py
+unset SUAP_TEST_USERNAME SUAP_TEST_PASSWORD</code></pre>
+      <p>Para outra instituição, defina também <code>SUAP_TEST_URL</code>. O teste autentica, renova o token e consulta dados do aluno, períodos, boletim, turmas e avaliações. Não imprime respostas nem salva tokens. Uma lista vazia não permite validar os campos dos registros.</p>
+      <p>Sem credenciais ou sem períodos, o teste retorna 2 (pendente/incompleto). Erros retornam 1. Isso não substitui testes com os diferentes perfis e permissões usados pela instituição.</p>
+    </section>
+    <section id="publicacao">
+      <h2>Publicação e diagnóstico</h2><p>O publicador deve ser do tipo <strong>GitHub</strong> no PyPI: proprietário <code>kellyson71</code>, repositório <code>suapy</code>, workflow <code>release.yml</code>, environment <code>pypi</code>.</p>
+      <p>Para testar somente a autenticação, abra Actions → Publish to PyPI → Run workflow, ou use:</p>
+      <pre><code>gh workflow run release.yml --ref main</code></pre>
+      <p>A execução manual troca a identidade do GitHub por uma credencial temporária do PyPI e a descarta. Não constrói, envia ou republica pacotes. Um erro <code>invalid-publisher</code> pede revisão do provedor e dos quatro campos do cadastro.</p>
+      <p>A publicação real ocorre ao publicar uma release com tag correspondente à versão em <code>pyproject.toml</code>. Ela passa pelos testes e pela validação dos pacotes. Uma versão já publicada não pode ser sobrescrita.</p>
+      <p>Consulte a <a href="https://docs.pypi.org/trusted-publishers/using-a-publisher/">documentação do PyPI</a> e o <a href="https://github.com/kellyson71/suapy/blob/main/CONTRIBUTING.md">guia de contribuição</a>.</p>
+    </section>
+    <footer>Suapy · Projeto independente, sem afiliação ao IFRN ou ao SUAP. <a href="https://github.com/kellyson71/suapy/blob/main/LICENSE">Licença MIT</a>.<br>Encontrou uma diferença na API? <a href="https://github.com/kellyson71/suapy/issues">Abra uma issue</a> sem incluir dados pessoais ou credenciais.</footer>
+  </main>
+</div>
+<span id="copy-status" class="sr-only" role="status" aria-live="polite"></span>
+</body>
+</html>

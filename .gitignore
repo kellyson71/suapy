@@ -16,3 +16,4 @@ doc/
 .pytest_cache/
 .coverage
 htmlcov/
+/docs/assets/

@@ -11,12 +11,24 @@ from .modules.infra import ModuloInfraestrutura
 from .modules.projects import ModuloPesquisaExtensao
 
 
+class _Pagina(dict):
+    """Dicionário JSON com a URL de origem, fora dos campos da API."""
+
+    def __init__(self, dados, url):
+        super().__init__(dados)
+        self.url_origem = url
+
+
 class Suap:
     """Cliente da API. O timeout limita conexão e leitura, em segundos."""
 
     def __init__(self, url_base="https://suap.ifrn.edu.br", verificar_ssl=True,
                  timeout=(5, 30)):
         self.url_base = url_base.rstrip('/')
+        base = urlsplit(self.url_base)
+        if (base.scheme not in ("http", "https") or not base.netloc
+                or base.username or base.password or base.query or base.fragment):
+            raise ValueError("url_base deve ser uma URL HTTP(S), sem credenciais, query ou fragmento.")
         self.verificar_ssl = verificar_ssl
         self.timeout = timeout
         self.sessao = requests.Session()
@@ -43,7 +55,11 @@ class Suap:
         self.sessao.headers.pop("Authorization", None)
 
     def _url(self, caminho):
-        url = urljoin(self.url_base + '/', caminho)
+        if not isinstance(caminho, str):
+            raise ValueError("O caminho deve ser uma string.")
+        partes = urlsplit(caminho)
+        url = (caminho if partes.scheme or partes.netloc
+               else urljoin(self.url_base + '/', caminho.lstrip('/')))
         base, destino = urlsplit(self.url_base), urlsplit(url)
         if ((base.scheme, base.netloc) != (destino.scheme, destino.netloc)
                 or destino.username or destino.password):
@@ -123,15 +139,21 @@ class Suap:
         if resposta.status_code == 401 and self.refresh_token:
             self.renovar_token()
             resposta = self._enviar(metodo, caminho, **kwargs)
-        return self._decodificar(resposta)
+        dados = self._decodificar(resposta)
+        if isinstance(dados, dict) and isinstance(dados.get("results"), list):
+            # Use a URL preparada pelo requests, incluindo parâmetros de consulta.
+            origem = resposta.url if isinstance(resposta.url, str) else self._url(caminho)
+            return _Pagina(dados, origem)
+        return dados
 
-    def iterar_resultados(self, resposta):
+    def iterar_resultados(self, resposta, url_origem=None):
         """Itera uma lista ou todas as páginas de um envelope results/next.
 
         Recebe o retorno de um método de consulta. Os métodos existentes
         continuam devolvendo o JSON original, sem normalização implícita.
         """
-        visitadas = set()
+        origem = url_origem or getattr(resposta, "url_origem", None)
+        visitadas = {self._url(origem)} if origem else set()
         while True:
             if isinstance(resposta, list):
                 yield from resposta
@@ -144,8 +166,16 @@ class Suap:
                 return
             if not isinstance(proxima, str):
                 raise SuapApiError("Link de paginação inválido.")
-            url = self._url(proxima)
+            if origem:
+                url = self._url(urljoin(origem, proxima))
+            elif proxima.startswith('/') or urlsplit(proxima).scheme:
+                # Links relativos à raiz do servidor não são endpoints do cliente.
+                base = urlsplit(self.url_base)
+                url = self._url(urljoin(f"{base.scheme}://{base.netloc}/", proxima))
+            else:
+                raise SuapApiError("Paginação relativa exige url_origem para um JSON externo.")
             if url in visitadas:
                 raise SuapApiError("Ciclo detectado na paginação.")
             visitadas.add(url)
             resposta = self.get(url)
+            origem = url

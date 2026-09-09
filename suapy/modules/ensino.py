@@ -1,3 +1,19 @@
+def validar_periodo(ano, periodo):
+    """Aceita inteiros ou strings decimais. Período positivo, inclusive anual."""
+    valores = []
+    for nome, valor in (("ano", ano), ("periodo", periodo)):
+        if isinstance(valor, bool) or not isinstance(valor, (int, str)):
+            raise ValueError(f"{nome} deve ser um inteiro positivo.")
+        if isinstance(valor, str) and not valor.isascii():
+            raise ValueError(f"{nome} deve usar dígitos de 0 a 9.")
+        if not str(valor).isdigit() or int(valor) <= 0:
+            raise ValueError(f"{nome} deve ser um inteiro positivo.")
+        valores.append(int(valor))
+    if not 1000 <= valores[0] <= 9999:
+        raise ValueError("ano deve ter quatro dígitos.")
+    return tuple(valores)
+
+
 class ModuloEnsino:
     """Módulo responsável por dados acadêmicos e estudantis."""
     def __init__(self, cliente):
@@ -9,6 +25,7 @@ class ModuloEnsino:
 
     def obter_boletim(self, ano, periodo):
         """Obtém o boletim do aluno para um ano e semestre letivo específicos."""
+        ano, periodo = validar_periodo(ano, periodo)
         return self.cliente.get(f"/api/ensino/meu-boletim/{ano}/{periodo}/")
 
     def obter_horario_aulas(self):
@@ -25,12 +42,16 @@ class ModuloEnsino:
         Lista as disciplinas/diários do semestre (Nota: Frequentemente restrito a professores).
         Para alunos, recomenda-se usar obter_turmas_virtuais ou obter_boletim.
         """
-        if ano and periodo:
+        if (ano is None) != (periodo is None):
+            raise ValueError("Informe ano e periodo juntos.")
+        if ano is not None:
+            ano, periodo = validar_periodo(ano, periodo)
             return self.cliente.get(f"/api/ensino/meus-diarios/{ano}/{periodo}/")
         return self.cliente.get("/api/ensino/meus-diarios/")
         
     def obter_turmas_virtuais(self, ano, periodo):
         """Obtém as turmas virtuais (materiais de aula, professores, participantes)."""
+        ano, periodo = validar_periodo(ano, periodo)
         return self.cliente.get(f"/api/ensino/minhas-turmas-virtuais/{ano}/{periodo}/")
 
     def obter_turma_virtual(self, pk):
@@ -46,6 +67,8 @@ class ModuloEnsino:
         Lista as mensagens na caixa de entrada do SUAP.
         status: 'nao_lidas', 'lidas' ou 'todas'
         """
+        if status not in ('nao_lidas', 'lidas', 'todas'):
+            raise ValueError("status deve ser nao_lidas, lidas ou todas.")
         return self.cliente.get(f"/api/ensino/mensagens/entrada/{status}/")
 
     def obter_requisitos_conclusao(self):

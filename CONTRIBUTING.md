@@ -24,6 +24,24 @@ O workflow `.github/workflows/release.yml` publica quando uma release do GitHub
 é publicada. Ele executa a matriz de testes, confere a tag contra a versão,
 constrói e valida os pacotes e só então solicita a credencial temporária.
 
+Para testar somente a autenticação, execute `gh workflow run release.yml --ref main`.
+O disparo manual executa `scripts/check_pypi_auth.py`, não os jobs de upload.
+Ele solicita e descarta uma credencial temporária, sem imprimir seu valor.
+
+## Documentação e testes reais
+
+A página está em `docs/index.html`, com CSS e JavaScript locais, sem build de frontend.
+Para pré-visualizar, copie a logo com `mkdir -p docs/assets && cp assets/suapy-logo.png docs/assets/`
+e execute `python -m http.server 8000 --directory docs`. Abra http://localhost:8000.
+No GitHub, configure Settings → Pages → Source como GitHub Actions; o workflow
+`docs.yml` publica a página a partir da main.
+
+Os testes reais são opt-in: configure `SUAP_TEST_USERNAME`, `SUAP_TEST_PASSWORD`
+e, opcionalmente, `SUAP_TEST_URL`, depois execute `python scripts/test_live.py`.
+Eles não são executados pela CI nem imprimem os registros. Sem uma conta disponível,
+o resultado é pendente (código 2), não aprovação. Consulte a página de documentação
+para fornecer a senha sem registrá-la no histórico do terminal.
+
 Configure o Trusted Publisher do projeto suapy no PyPI com:
 
 - Owner: `kellyson71` (proprietário do repositório GitHub).
