@@ -17,3 +17,6 @@ doc/
 .coverage
 htmlcov/
 /docs/assets/
+.mypy_cache/
+.ruff_cache/
+.tox/
