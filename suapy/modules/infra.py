@@ -1,4 +1,6 @@
 class ModuloInfraestrutura:
+    """Módulo de unidades organizacionais e setores da instituição."""
+
     def __init__(self, cliente):
         self.cliente = cliente
 

@@ -1,4 +1,6 @@
 class ModuloPesquisaExtensao:
+    """Módulo de projetos de pesquisa e extensão."""
+
     def __init__(self, cliente):
         self.cliente = cliente
 

@@ -1,4 +1,6 @@
 class ModuloUsuario:
+    """Módulo de dados pessoais e funcionais do usuário autenticado."""
+
     def __init__(self, cliente):
         self.cliente = cliente
 
