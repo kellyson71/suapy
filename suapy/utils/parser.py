@@ -7,11 +7,11 @@ def parse_horario(horario_str):
     """
     if not horario_str:
         return []
-    
+
     # Example: '2V34 / 4V56' -> ['2V34', '4V56']
     parts = [p.strip() for p in horario_str.split('/')]
     results = []
-    
+
     dias_map = {
         '2': 'Segunda',
         '3': 'Terça',
@@ -21,7 +21,7 @@ def parse_horario(horario_str):
         '7': 'Sábado',
         '1': 'Domingo'
     }
-    
+
     turnos_map = {
         'M': 'Manhã',
         'V': 'Tarde',

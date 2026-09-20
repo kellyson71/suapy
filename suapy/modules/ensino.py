@@ -48,7 +48,7 @@ class ModuloEnsino:
             ano, periodo = validar_periodo(ano, periodo)
             return self.cliente.get(f"/api/ensino/meus-diarios/{ano}/{periodo}/")
         return self.cliente.get("/api/ensino/meus-diarios/")
-        
+
     def obter_turmas_virtuais(self, ano, periodo):
         """Obtém as turmas virtuais (materiais de aula, professores, participantes)."""
         ano, periodo = validar_periodo(ano, periodo)
@@ -57,11 +57,11 @@ class ModuloEnsino:
     def obter_turma_virtual(self, pk):
         """Obtém detalhes de uma turma virtual específica."""
         return self.cliente.get(f"/api/ensino/minha-turma-virtual/{pk}/")
-        
+
     def obter_proximas_avaliacoes(self):
         """Lista as próximas provas, trabalhos ou avaliações cadastradas."""
         return self.cliente.get("/api/ensino/minhas-proximas-avaliacoes/")
-        
+
     def obter_mensagens_aluno(self, status='nao_lidas'):
         """
         Lista as mensagens na caixa de entrada do SUAP.
