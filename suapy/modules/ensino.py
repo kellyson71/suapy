@@ -1,7 +1,7 @@
-def validar_periodo(ano, periodo):
+def validar_periodo(ano, periodo, nome_periodo="periodo"):
     """Aceita inteiros ou strings decimais. Período positivo, inclusive anual."""
     valores = []
-    for nome, valor in (("ano", ano), ("periodo", periodo)):
+    for nome, valor in (("ano", ano), (nome_periodo, periodo)):
         if isinstance(valor, bool) or not isinstance(valor, (int, str)):
             raise ValueError(f"{nome} deve ser um inteiro positivo.")
         if isinstance(valor, str) and not valor.isascii():

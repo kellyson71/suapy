@@ -1,3 +1,6 @@
+from .ensino import validar_periodo
+
+
 class ModuloUsuario:
     """Módulo de dados pessoais e funcionais do usuário autenticado."""
 
@@ -22,4 +25,7 @@ class ModuloUsuario:
 
     def obter_contracheque_detalhado(self, ano, mes):
         """Obtém detalhes de um contracheque específico por ano e mês."""
+        ano, mes = validar_periodo(ano, mes, nome_periodo="mes")
+        if mes > 12:
+            raise ValueError("mes deve estar entre 1 e 12.")
         return self.cliente.get(f"/api/rh/meu-contracheque/{ano}/{mes}/")
