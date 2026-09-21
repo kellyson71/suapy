@@ -56,7 +56,9 @@ class ModuloEnsino:
 
     def obter_turma_virtual(self, pk):
         """Obtém detalhes de uma turma virtual específica."""
-        return self.cliente.get(f"/api/ensino/minha-turma-virtual/{pk}/")
+        if isinstance(pk, bool) or not str(pk).isascii() or not str(pk).isdigit() or int(pk) <= 0:
+            raise ValueError("pk deve ser um inteiro positivo.")
+        return self.cliente.get(f"/api/ensino/minha-turma-virtual/{int(pk)}/")
 
     def obter_proximas_avaliacoes(self):
         """Lista as próximas provas, trabalhos ou avaliações cadastradas."""
