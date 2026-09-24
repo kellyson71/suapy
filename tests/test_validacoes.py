@@ -17,3 +17,10 @@ def test_contracheque_rejeita_ano_ou_mes_invalido(client, ano, mes):
     with pytest.raises(ValueError):
         client.usuario.obter_contracheque_detalhado(ano, mes)
     client.sessao.request.assert_not_called()
+
+
+@pytest.mark.parametrize("pk", [0, -1, "abc", "../eu", None, True, 1.5])
+def test_turma_virtual_rejeita_pk_invalido(client, pk):
+    with pytest.raises(ValueError):
+        client.ensino.obter_turma_virtual(pk)
+    client.sessao.request.assert_not_called()
