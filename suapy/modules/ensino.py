@@ -31,7 +31,7 @@ class ModuloEnsino:
     def obter_horario_aulas(self):
         """Obtém o horário de aulas (extraído dos dados do aluno ou turmas)."""
         dados = self.obter_dados_aluno()
-        return dados.get("horario_aula") if dados else None
+        return dados.get("horario_aula") if isinstance(dados, dict) else None
 
     def obter_periodos_letivos(self):
         """Obtém o histórico de períodos letivos do aluno."""
