@@ -10,6 +10,8 @@ def para_dataframe(dados, chave=None):
     if chave is not None:
         if not isinstance(dados, dict):
             raise TypeError("O argumento chave exige um dicionário.")
+        if chave not in dados:
+            raise KeyError(f"A resposta não tem a chave {chave!r}.")
         dados = dados[chave]
     if not isinstance(dados, list):
         dados = [dados]
