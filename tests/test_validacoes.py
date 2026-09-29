@@ -24,3 +24,10 @@ def test_turma_virtual_rejeita_pk_invalido(client, pk):
     with pytest.raises(ValueError):
         client.ensino.obter_turma_virtual(pk)
     client.sessao.request.assert_not_called()
+
+
+@pytest.mark.parametrize("usuario, senha", [("", "senha"), ("user", ""), ("  ", "senha"), (None, "senha")])
+def test_login_rejeita_credenciais_vazias(client, usuario, senha):
+    with pytest.raises(ValueError):
+        client.login(usuario, senha)
+    client.sessao.request.assert_not_called()
