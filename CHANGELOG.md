@@ -7,6 +7,8 @@
 - Consultas diretas no CLI, exportação CSV/JSON e modo sem persistência de sessão.
 - URLs alternativas no CLI sem reutilizar a sessão do IFRN.
 - Teste opt-in com conta real e diagnóstico OIDC sem upload via execução manual.
+- Validação de mês do contracheque, identificador da turma virtual e credenciais vazias no login.
+- `parse_horario` aceita turno em minúsculas; `suapy.__version__` disponível.
 - Página de documentação responsiva e workflow para GitHub Pages.
 
 ## 1.4.0 — 2026-09-09
