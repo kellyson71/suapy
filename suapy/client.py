@@ -104,6 +104,9 @@ class Suap:
 
     def login(self, usuario, senha):
         """Autentica uma conta e guarda seus tokens em memória."""
+        for nome, valor in (("usuario", usuario), ("senha", senha)):
+            if not isinstance(valor, str) or not valor.strip():
+                raise ValueError(f"{nome} não pode ser vazio.")
         self.logout()
         dados = self._decodificar(self._enviar(
             "POST", "/api/token/pair", json={"username": usuario, "password": senha}))
