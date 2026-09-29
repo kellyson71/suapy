@@ -9,7 +9,7 @@ def parse_horario(horario_str):
         return []
 
     # Example: '2V34 / 4V56' -> ['2V34', '4V56']
-    parts = [p.strip() for p in horario_str.split('/')]
+    parts = [p.strip().upper() for p in horario_str.split('/')]
     results = []
 
     dias_map = {
