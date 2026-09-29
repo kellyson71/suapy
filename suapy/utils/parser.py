@@ -1,5 +1,22 @@
 import re
 
+DIAS = {
+    '2': 'Segunda',
+    '3': 'Terça',
+    '4': 'Quarta',
+    '5': 'Quinta',
+    '6': 'Sexta',
+    '7': 'Sábado',
+    '1': 'Domingo'
+}
+
+TURNOS = {
+    'M': 'Manhã',
+    'V': 'Tarde',
+    'N': 'Noite'
+}
+
+
 def parse_horario(horario_str):
     """
     Interpreta horários como '2V34 / 4V56'.
@@ -12,22 +29,6 @@ def parse_horario(horario_str):
     parts = [p.strip().upper() for p in horario_str.split('/')]
     results = []
 
-    dias_map = {
-        '2': 'Segunda',
-        '3': 'Terça',
-        '4': 'Quarta',
-        '5': 'Quinta',
-        '6': 'Sexta',
-        '7': 'Sábado',
-        '1': 'Domingo'
-    }
-
-    turnos_map = {
-        'M': 'Manhã',
-        'V': 'Tarde',
-        'N': 'Noite'
-    }
-
     for part in parts:
         # Match pattern: Day(s) Turn Slot(s)
         # Some are single days: 2V34
@@ -37,9 +38,9 @@ def parse_horario(horario_str):
             dias_chars, turno_char, slots_chars = match.groups()
             for d in dias_chars:
                 results.append({
-                    'dia_semana': dias_map.get(d, 'Desconhecido'),
+                    'dia_semana': DIAS.get(d, 'Desconhecido'),
                     'dia_num': int(d),
-                    'turno': turnos_map.get(turno_char, 'Desconhecido'),
+                    'turno': TURNOS.get(turno_char, 'Desconhecido'),
                     'horarios': [int(s) for s in slots_chars]
                 })
     return results
