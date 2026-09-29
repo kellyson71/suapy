@@ -36,3 +36,9 @@ def test_schedule_parser():
     assert [r["dia_num"] for r in rows] == [2, 3, 4]
     assert rows[-1]["turno"] == "Noite"
     assert parse_horario(None) == []
+
+
+def test_schedule_parser_lowercase():
+    rows = parse_horario("2m12 / 3v34")
+    assert [(r["dia_semana"], r["turno"]) for r in rows] == [("Segunda", "Manhã"), ("Terça", "Tarde")]
+    assert rows[0]["horarios"] == [1, 2]
