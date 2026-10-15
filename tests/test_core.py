@@ -10,10 +10,12 @@ def test_suap_instance():
 
 
 def test_version_matches_pyproject():
-    import tomllib
+    import re
     from pathlib import Path
 
     import suapy
 
-    projeto = tomllib.loads((Path(__file__).parent.parent / "pyproject.toml").read_text())
-    assert suapy.__version__ == projeto["project"]["version"]
+    # tomllib só existe a partir do Python 3.11; o projeto ainda suporta 3.10.
+    texto = (Path(__file__).parent.parent / "pyproject.toml").read_text(encoding="utf-8")
+    versao = re.search(r'^version\s*=\s*"([^"]+)"', texto, re.MULTILINE).group(1)
+    assert suapy.__version__ == versao
