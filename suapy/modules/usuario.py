@@ -15,6 +15,10 @@ class ModuloUsuario:
         """Obtém o perfil pessoal completo."""
         return self.cliente.get("/api/rh/meus-dados/")
 
+    def obter_meus_vinculos(self):
+        """Lista os vínculos (aluno, servidor) da conta; a resposta é paginada."""
+        return self.cliente.get("/api/rh/meus-vinculos/")
+
     def obter_historico_funcional(self):
         """Obtém o histórico funcional."""
         return self.cliente.get("/api/rh/meu-historico-funcional/")

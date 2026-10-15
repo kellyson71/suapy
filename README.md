@@ -15,9 +15,6 @@ podem ter endpoints ou permissões diferentes; a compatibilidade não é garanti
 [Documentação completa](https://kellyson71.github.io/suapy/) ·
 [Fonte da documentação](https://github.com/kellyson71/suapy/tree/main/docs)
 
-As funcionalidades novas abaixo fazem parte da 1.4.1 em preparação. Até sua
-publicação, instale o código do repositório para experimentá-las.
-
 ## Instalação
 
 Requer Python 3.10 ou superior. A versão 1.4 passa a exigir esse mínimo.
@@ -109,6 +106,29 @@ except SuapError as erro:
 O bloco `with` fecha as conexões ao terminar. Sem ele, chame `suap.fechar()`.
 A biblioteca mantém tokens somente em memória; a gravação em disco é uma função do CLI.
 
+## Identificar a conta
+
+Para validar uma conta no login de outro sistema, `autenticar` faz o login,
+devolve um `Perfil` com campos estáveis e fecha a conexão sem guardar tokens.
+A senha só é enviada ao SUAP.
+
+```python
+from suapy import SuapAuthError, autenticar
+
+try:
+    perfil = autenticar(matricula, senha)
+except SuapAuthError:
+    print("Matrícula ou senha inválidas.")
+else:
+    if perfil.aluno_ativo:
+        print(perfil.nome, perfil.email, perfil.vinculo_aluno_ativo.curso)
+```
+
+Com um cliente já autenticado, use `suap.obter_perfil()`. O `Perfil` reúne
+`matricula`, `nome`, `email`, `campus`, `tipo_usuario`, `foto` e `vinculos`;
+`aluno_ativo` indica se há vínculo de aluno ativo. Os dados vêm de
+`/api/rh/eu/` e `/api/rh/meus-vinculos/`.
+
 ## Consultas disponíveis
 
 Os retornos dependem do perfil da conta e dos dados cadastrados na instituição.
@@ -127,7 +147,7 @@ Os retornos dependem do perfil da conta e dos dados cadastrados na instituição
 | `obter_diarios(ano=None, periodo=None)` | Diários; pode exigir perfil de professor |
 
 Para faltas e notas de alunos, use `obter_boletim()`. A biblioteca também expõe
-os módulos `usuario`, `infraestrutura` e `pesquisa_extensao`; consulte os
+os módulos `usuario` (inclusive `obter_meus_vinculos()`), `infraestrutura` e `pesquisa_extensao`; consulte os
 [métodos no código](https://github.com/kellyson71/suapy/tree/main/suapy/modules).
 
 ## Respostas e paginação

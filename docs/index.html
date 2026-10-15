@@ -30,7 +30,6 @@
       <h1>Seus dados acadêmicos,<br>em Python ou no terminal.</h1>
       <p class="lead">Consulte notas, faltas, avaliações e horários. Use os métodos em português ou exporte os registros para trabalhar com eles em uma planilha.</p>
       <p>O cliente usa o SUAP do IFRN por padrão. Outras instituições podem ter APIs e permissões diferentes. Este é um projeto independente.</p>
-      <p class="note">Esta página descreve a 1.4.1. Enquanto ela não estiver no PyPI, instale o código do repositório para usar os novos comandos.</p>
     </header>
     <section id="instalacao">
       <h2>Instalação</h2><p>Use Python 3.10 ou superior. Em um ambiente virtual:</p>
@@ -131,10 +130,15 @@ registros = suap.iterar_resultados(
       <h2>Métodos da API</h2><p>Todos os métodos dependem dos endpoints e das permissões da instituição.</p>
       <div class="table-wrap"><table><thead><tr><th>Módulo</th><th>Métodos</th></tr></thead><tbody>
       <tr><td><code>ensino</code></td><td><code>obter_dados_aluno()</code>, <code>obter_periodos_letivos()</code>, <code>obter_boletim(ano, periodo)</code>, <code>obter_turmas_virtuais(ano, periodo)</code>, <code>obter_turma_virtual(pk)</code>, <code>obter_proximas_avaliacoes()</code>, <code>obter_mensagens_aluno(status)</code>, <code>obter_requisitos_conclusao()</code>, <code>obter_eventos()</code>, <code>obter_horario_aulas()</code>, <code>obter_diarios(ano=None, periodo=None)</code>.</td></tr>
-      <tr><td><code>usuario</code></td><td><code>obter_meus_dados_resumidos()</code>, <code>obter_meus_dados()</code>, <code>obter_historico_funcional()</code>, <code>obter_contracheques()</code>, <code>obter_contracheque_detalhado(ano, mes)</code>.</td></tr>
+      <tr><td><code>usuario</code></td><td><code>obter_meus_dados_resumidos()</code>, <code>obter_meus_dados()</code>, <code>obter_meus_vinculos()</code>, <code>obter_historico_funcional()</code>, <code>obter_contracheques()</code>, <code>obter_contracheque_detalhado(ano, mes)</code>.</td></tr>
       <tr><td><code>infraestrutura</code></td><td><code>obter_campi()</code>, <code>obter_setores()</code>.</td></tr>
       <tr><td><code>pesquisa_extensao</code></td><td><code>obter_projetos_pesquisa()</code>, <code>obter_projetos_extensao()</code>.</td></tr>
       </tbody></table></div>
+      <h3>Identificar a conta</h3><p><code>autenticar(usuario, senha)</code> faz o login, devolve um <code>Perfil</code> (matrícula, nome, e-mail, campus, vínculos e <code>aluno_ativo</code>) e fecha a conexão sem guardar tokens. Com um cliente autenticado, use <code>suap.obter_perfil()</code>.</p>
+      <pre><code>from suapy import autenticar
+perfil = autenticar(matricula, senha)
+if perfil.aluno_ativo:
+    print(perfil.nome, perfil.vinculo_aluno_ativo.curso)</code></pre>
       <p>Para notas e faltas de alunos, use boletim. Diários podem exigir perfil de professor. Métodos funcionais podem exigir vínculo de servidor.</p>
       <h3>Interpretar horários</h3><pre><code>from suapy import parse_horario
 print(parse_horario("2V34 / 4V56"))</code></pre>

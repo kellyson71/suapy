@@ -9,6 +9,7 @@ from .modules.usuario import ModuloUsuario
 from .modules.ensino import ModuloEnsino
 from .modules.infra import ModuloInfraestrutura
 from .modules.projects import ModuloPesquisaExtensao
+from .perfil import montar_perfil
 
 
 class _Pagina(dict):
@@ -130,6 +131,12 @@ class Suap:
     def _atualizar_cabecalho_auth(self):
         if self.token:
             self.sessao.headers.update({"Authorization": "Bearer " + self.token})
+
+    def obter_perfil(self):
+        """Identificação normalizada da conta: matrícula, nome, e-mail e vínculos."""
+        eu = self.usuario.obter_meus_dados_resumidos()
+        vinculos = self.iterar_resultados(self.usuario.obter_meus_vinculos())
+        return montar_perfil(eu, vinculos)
 
     def get(self, caminho, params=None):
         return self._requisicao("GET", caminho, params=params)
