@@ -1,6 +1,6 @@
 # Alterações
 
-## 1.4.1 — em preparação
+## 1.4.1 — 2026-10-15
 
 - Prefixos de instalação preservados nos endpoints; paginação relativa à URL consultada.
 - Validação de ano, período e status de mensagens antes das chamadas HTTP.
@@ -10,6 +10,8 @@
 - Validação de mês do contracheque, identificador da turma virtual e credenciais vazias no login.
 - `parse_horario` aceita turno em minúsculas; `suapy.__version__` disponível.
 - Página de documentação responsiva e workflow para GitHub Pages.
+- `autenticar()` e `Suap.obter_perfil()` devolvem um `Perfil` normalizado (matrícula, nome, e-mail, vínculos e `aluno_ativo`).
+- `usuario.obter_meus_vinculos()` para `/api/rh/meus-vinculos/`.
 
 ## 1.4.0 — 2026-09-09
 
