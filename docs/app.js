@@ -5,7 +5,8 @@ document.querySelectorAll('.code-window').forEach((frame) => {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'copy';
-  const label = frame.classList.contains('terminal') ? 'Copiar texto' : 'Copiar código';
+  const label = frame.classList.contains('prompt') ? 'Copiar prompt'
+    : frame.classList.contains('editor') ? 'Copiar código' : 'Copiar texto';
   button.textContent = label;
   button.setAttribute('aria-label', `${label}: ${frame.querySelector('.window-title').textContent}`);
   button.addEventListener('click', async () => {

@@ -1,0 +1,48 @@
+name: Retorno inesperado
+description: Relate resposta, campo ou erro diferente do esperado.
+title: "[Retorno] "
+body:
+  - type: markdown
+    attributes:
+      value: Substitua nomes, matrículas e e-mails por valores fictícios. Remova senhas, tokens, cookies e cabeçalhos de autenticação antes de enviar código ou respostas.
+  - type: input
+    id: versao
+    attributes:
+      label: Versões de Suapy e Python
+      description: Consulte com python -m pip show suapy e python --version.
+    validations:
+      required: true
+  - type: input
+    id: instituicao
+    attributes:
+      label: Instituição e URL pública do SUAP
+    validations:
+      required: true
+  - type: input
+    id: metodo
+    attributes:
+      label: Método ou comando utilizado
+      placeholder: suap.ensino.obter_horario_aulas()
+    validations:
+      required: true
+  - type: textarea
+    id: reproducao
+    attributes:
+      label: Como reproduzir
+      description: Inclua um exemplo mínimo sem credenciais e, se relevante, o tipo de vínculo da conta.
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+  - type: textarea
+    id: recebido
+    attributes:
+      label: Resultado recebido ou mensagem de erro
+      description: Cole uma resposta anonimizada ou o erro. Informe o status HTTP, se disponível. Não exponha tokens nem dados de contas.
+      render: text
+    validations:
+      required: true

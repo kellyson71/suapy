@@ -16,3 +16,12 @@
 .download{display:inline-block;padding:9px 16px;margin-right:12px;background:var(--green);color:var(--surface);border-radius:6px;text-decoration:none;font-weight:600}
 @media(prefers-color-scheme:dark){:root{--ink:#e3ece7;--muted:#a9bbb0;--green:#74dfaa;--line:#35433d;--paper:#111815;--code:#202c25;--surface:#19231e;--note:#1c2b22;--editor:#1e1e1e;--chrome:#282828;--editor-ink:#d4d4d4;--terminal:#161b18;--keyword:#c586c0;--string:#ce9178;--comment:#8ab879;--number:#b5cea8;--shadow:0 8px 28px #0003}.download{color:#111815}.brand{background:#fff}}
 @media(max-width:500px){.code-window figcaption{padding:10px;gap:8px}.window-language{display:none}.code-window pre{padding:14px}.code-window pre code{font-size:12px}}
+
+.notebook{margin:24px 0;border:1px solid var(--line);border-radius:9px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow)}
+.notebook figcaption{padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+.notebook .table-wrap{padding:16px}.notebook table{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.notebook thead th{text-align:right!important}.notebook tbody th{text-align:right}.notebook tbody tr:nth-child(odd){background:var(--code)}.notebook td{text-align:right;white-space:nowrap}.notebook td:first-of-type{text-align:left}
+caption{text-align:left;font-weight:600;padding:12px 10px;color:var(--ink)}
+details{margin:22px 0;border:1px solid var(--line);border-radius:8px;padding:14px 16px}summary{cursor:pointer;color:var(--green);font-weight:600}summary:focus-visible{outline:3px solid #bd6500;outline-offset:4px}details .code-window{margin-bottom:0}
+.contribution-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:24px 0}.contribution-grid article{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:20px}.contribution-grid h3{margin-top:0}.contribution-grid p{color:var(--muted)}
+.code-window.prompt pre code{white-space:pre-wrap;overflow-wrap:anywhere}.code-window.prompt{border-color:var(--green)}
+@media(max-width:600px){.contribution-grid{grid-template-columns:1fr}}

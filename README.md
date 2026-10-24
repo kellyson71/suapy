@@ -256,12 +256,17 @@ as causas. `SuapApiError` disponibiliza `status_code` e `response` quando aplic�
 
 ## Desenvolvimento
 
-Para usar o Suapy com um agente ou IA, forneça a
-[skill Suapy](docs/skills/suapy/SKILL.md) como arquivo ou contexto da conversa.
-Ela reúne os contratos da biblioteca, exemplos e orientações de paginação,
-sessão e erros. Se a ferramenta aceita skills, instale a pasta `suapy` no
-diretório indicado por ela. Veja também as
-[instruções na documentação](https://kellyson71.github.io/suapy/#agentes).
+Para preparar o projeto com seu agente ou IA, copie o prompt de
+[Comece rápido com sua IA](https://kellyson71.github.io/suapy/#agentes).
+Ele orienta o agente a instalar a biblioteca, baixar a
+[skill Suapy](docs/skills/suapy/SKILL.md) e criar o primeiro script.
+A documentação também inclui uma
+[demonstração com Pandas](https://kellyson71.github.io/suapy/#pandas), com tabela,
+saída do terminal e [script completo](docs/examples/analise_boletim.py).
+
+Faltou uma funcionalidade? [Solicite um endpoint](https://github.com/kellyson71/suapy/issues/new?template=endpoint.yml).
+Recebeu uma resposta diferente do esperado? [Relate o retorno](https://github.com/kellyson71/suapy/issues/new?template=retorno.yml)
+com um exemplo anonimizado.
 
 Veja o [guia de contribuição](https://github.com/kellyson71/suapy/blob/main/CONTRIBUTING.md)
 para instalar o projeto, executar os testes e preparar uma distribuição.

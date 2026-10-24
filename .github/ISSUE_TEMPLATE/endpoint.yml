@@ -1,0 +1,37 @@
+name: Solicitar endpoint
+description: Sugira uma consulta ou funcionalidade para o Suapy.
+title: "[Endpoint] "
+body:
+  - type: markdown
+    attributes:
+      value: Não envie credenciais, tokens, cookies ou dados pessoais. O suporte depende da API e das permissões da instituição.
+  - type: input
+    id: instituicao
+    attributes:
+      label: Instituição e URL pública do SUAP
+      placeholder: IFRN — https://suap.ifrn.edu.br
+    validations:
+      required: true
+  - type: textarea
+    id: funcionalidade
+    attributes:
+      label: Qual funcionalidade você precisa?
+      description: Descreva o que pretende consultar e como isso ajudaria no seu uso.
+    validations:
+      required: true
+  - type: textarea
+    id: endpoint
+    attributes:
+      label: Endpoint ou documentação pública, se conhecer
+      description: Informe método HTTP, caminho, parâmetros e link da documentação. Não inclua dados privados na URL.
+  - type: input
+    id: perfil
+    attributes:
+      label: Perfil necessário, se souber
+      placeholder: Aluno, professor, servidor ou outro.
+  - type: textarea
+    id: resposta
+    attributes:
+      label: Exemplo anonimizado de resposta, se disponível
+      description: Use valores fictícios e preserve a estrutura relevante. Informe se é uma resposta real anonimizada ou uma sugestão de formato.
+      render: json
