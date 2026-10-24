@@ -70,6 +70,25 @@ Isso remove o token local; não o revoga no servidor.
 
 ## Em Python
 
+Comece com um login e um print. A senha é digitada sem aparecer no terminal:
+
+```python
+from getpass import getpass
+from suapy import autenticar
+
+matricula = input("Digite sua matrícula: ")
+senha = getpass("Digite sua senha: ")
+
+perfil = autenticar(matricula, senha)
+
+print("Login realizado com sucesso!")
+print(f"Olá, {perfil.nome}!")
+print(f"E-mail: {perfil.email}")
+```
+
+`autenticar` devolve o perfil e fecha a conexão. Para continuar consultando a API,
+use um cliente `Suap`, como no exemplo abaixo.
+
 O exemplo consulta os períodos disponíveis e busca o boletim do mais recente.
 A senha é solicitada no terminal, sem ficar escrita no código.
 
@@ -236,6 +255,13 @@ Capture as exceções específicas antes de `SuapError` quando precisar distingu
 as causas. `SuapApiError` disponibiliza `status_code` e `response` quando aplicáveis.
 
 ## Desenvolvimento
+
+Para usar o Suapy com um agente ou IA, forneça a
+[skill Suapy](docs/skills/suapy/SKILL.md) como arquivo ou contexto da conversa.
+Ela reúne os contratos da biblioteca, exemplos e orientações de paginação,
+sessão e erros. Se a ferramenta aceita skills, instale a pasta `suapy` no
+diretório indicado por ela. Veja também as
+[instruções na documentação](https://kellyson71.github.io/suapy/#agentes).
 
 Veja o [guia de contribuição](https://github.com/kellyson71/suapy/blob/main/CONTRIBUTING.md)
 para instalar o projeto, executar os testes e preparar uma distribuição.

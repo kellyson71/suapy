@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Documentação do Suapy: consulte a API do SUAP em Python, use o terminal e exporte boletins em CSV ou JSON.">
   <title>Suapy — Documentação</title>
@@ -20,11 +21,11 @@
       <p class="group">Uso diário</p>
       <a href="#exportacao">Exportar dados</a><a href="#sessao">Login e sessão</a><a href="#paginacao">URLs e paginação</a>
       <p class="group">Referência</p>
-      <a href="#api">Métodos da API</a><a href="#erros">Erros e validação</a><a href="#testes">Testes</a><a href="#publicacao">Publicação</a>
+      <a href="#agentes">Skill para sua IA</a><a href="#api">Métodos da API</a><a href="#erros">Erros e validação</a><a href="#testes">Testes</a><a href="#publicacao">Publicação</a>
     </nav>
   </aside>
   <main id="conteudo">
-    <div class="topline"><span>Python · API do SUAP</span><span><a href="https://github.com/kellyson71/suapy">GitHub</a> &nbsp;/&nbsp; <a href="https://pypi.org/project/suapy/">PyPI</a></span></div>
+    <div class="topline"><span>Python · API do SUAP · Tema do sistema</span><span><a href="https://github.com/kellyson71/suapy">GitHub</a> &nbsp;/&nbsp; <a href="https://pypi.org/project/suapy/">PyPI</a></span></div>
     <header id="inicio">
       <img class="brand" src="assets/suapy-logo.png" alt="Suapy, biblioteca Python para a API do SUAP" width="1448" height="1086">
       <h1>Seus dados acadêmicos,<br>em Python ou no terminal.</h1>
@@ -33,23 +34,23 @@
     </header>
     <section id="instalacao">
       <h2>Instalação</h2><p>Use Python 3.10 ou superior. Em um ambiente virtual:</p>
-      <pre><code>python -m venv .venv
+      <figure class="code-window terminal"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Terminal · Bash</span><span class="window-language">BASH</span></figcaption><pre><code>python -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade suapy</code></pre>
+python -m pip install --upgrade suapy</code></pre></figure>
       <p>No Windows, ative com <code>.venv\Scripts\activate</code>. Para conversão em DataFrame, instale <code>python -m pip install "suapy[pandas]"</code>. CSV e JSON não precisam de Pandas.</p>
       <h3>Versão do repositório</h3>
-      <pre><code>git clone https://github.com/kellyson71/suapy.git
+      <figure class="code-window terminal"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Terminal · Bash</span><span class="window-language">BASH</span></figcaption><pre><code>git clone https://github.com/kellyson71/suapy.git
 cd suapy
-python -m pip install -e ".[dev,pandas]"</code></pre>
+python -m pip install -e &quot;.[dev,pandas]&quot;</code></pre></figure>
     </section>
     <section id="terminal">
       <h2>Pelo terminal</h2><p>Execute <code>suapy</code> para abrir o menu interativo. Para uma consulta direta, use um dos comandos abaixo. Quando necessário, o terminal solicita matrícula e senha.</p>
-      <pre><code>suapy periodos
+      <figure class="code-window terminal"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Terminal · Bash</span><span class="window-language">BASH</span></figcaption><pre><code>suapy periodos
 suapy boletim --ano 2026 --periodo 2
 suapy turmas --ano 2026 --periodo 2
 suapy avaliacoes
 suapy mensagens --status nao_lidas
-suapy progresso</code></pre>
+suapy progresso</code></pre></figure>
       <p>Escolha ano e período a partir de <code>suapy periodos</code>; os valores do exemplo não garantem que existam registros na sua conta. Use <code>suapy --help</code> ou <code>suapy boletim --help</code> para ver as opções.</p>
       <div class="table-wrap"><table><thead><tr><th>Opção</th><th>Uso</th></tr></thead><tbody>
       <tr><td><code>--formato tabela|json|csv</code></td><td>Formato da consulta; o padrão é tabela.</td></tr>
@@ -59,72 +60,110 @@ suapy progresso</code></pre>
       </tbody></table></div>
     </section>
     <section id="python">
-      <h2>Em Python</h2><p>Autentique e selecione o período mais recente informado pela API:</p>
-      <pre><code>from getpass import getpass
-from suapy import Suap, SuapError
+      <h2>Em Python</h2><p>Comece com um login e um print. Salve como <code>login_simples.py</code> e execute no terminal:</p>
+      <figure class="code-window editor"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">login_simples.py</span><span class="window-language">PYTHON</span></figcaption><pre><code><span class="syntax-keyword">from</span> getpass <span class="syntax-keyword">import</span> getpass
+<span class="syntax-keyword">from</span> suapy <span class="syntax-keyword">import</span> autenticar
 
-try:
-    with Suap(timeout=(5, 30)) as suap:
-        suap.login(input("Matrícula: "), getpass("Senha: "))
+matricula = input(<span class="syntax-string">&quot;Digite sua matrícula: &quot;</span>)
+senha = getpass(<span class="syntax-string">&quot;Digite sua senha: &quot;</span>)
+
+perfil = autenticar(matricula, senha)
+
+print(<span class="syntax-string">&quot;Login realizado com sucesso!&quot;</span>)
+print(f&quot;Olá, {perfil.nome}!&quot;)
+print(f&quot;E-mail: {perfil.email}&quot;)</code></pre></figure>
+      <figure class="code-window terminal"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Terminal · saída ilustrativa</span><span class="window-language">SAÍDA</span></figcaption><pre><code>$ python login_simples.py
+Digite sua matrícula: 20260000000000
+Digite sua senha:
+Login realizado com sucesso!
+Olá, Ana Exemplo!
+E-mail: ana@example.com</code></pre></figure>
+      <p>Os dados acima são fictícios. A senha não aparece ao digitar. <code>autenticar</code> retorna o perfil e fecha a conexão; para continuar consultando a API, use <code>Suap</code>.</p>
+      <h3>Consultar notas e faltas</h3><p>Autentique e selecione o período mais recente informado pela API:</p>
+      <figure class="code-window editor"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">boletim.py</span><span class="window-language">PYTHON</span></figcaption><pre><code><span class="syntax-keyword">from</span> getpass <span class="syntax-keyword">import</span> getpass
+<span class="syntax-keyword">from</span> suapy <span class="syntax-keyword">import</span> Suap, SuapError
+
+<span class="syntax-keyword">try</span>:
+    <span class="syntax-keyword">with</span> Suap(timeout=(<span class="syntax-number">5</span>, <span class="syntax-number">30</span>)) <span class="syntax-keyword">as</span> suap:
+        suap.login(input(<span class="syntax-string">&quot;Matrícula: &quot;</span>), getpass(<span class="syntax-string">&quot;Senha: &quot;</span>))
         periodos = list(suap.iterar_resultados(
             suap.ensino.obter_periodos_letivos()
         ))
-        if periodos:
-            atual = max(periodos, key=lambda p: (
-                int(p["ano_letivo"]), int(p["periodo_letivo"])
+        <span class="syntax-keyword">if</span> periodos:
+            atual = max(periodos, key=<span class="syntax-keyword">lambda</span> p: (
+                int(p[<span class="syntax-string">&quot;ano_letivo&quot;</span>]), int(p[<span class="syntax-string">&quot;periodo_letivo&quot;</span>])
             ))
             boletim = suap.ensino.obter_boletim(
-                atual["ano_letivo"], atual["periodo_letivo"]
+                atual[<span class="syntax-string">&quot;ano_letivo&quot;</span>], atual[<span class="syntax-string">&quot;periodo_letivo&quot;</span>]
             )
-            for disciplina in suap.iterar_resultados(boletim):
-                print(disciplina.get("disciplina"),
-                      disciplina.get("numero_faltas"))
-except SuapError as erro:
-    print(f"Consulta indisponível: {erro}")</code></pre>
+            <span class="syntax-keyword">for</span> disciplina <span class="syntax-keyword">in</span> suap.iterar_resultados(boletim):
+                print(disciplina.get(<span class="syntax-string">&quot;disciplina&quot;</span>),
+                      disciplina.get(<span class="syntax-string">&quot;numero_faltas&quot;</span>))
+<span class="syntax-keyword">except</span> SuapError <span class="syntax-keyword">as</span> erro:
+    print(f&quot;Consulta indisponível: {erro}&quot;)</code></pre></figure>
+      <figure class="code-window terminal"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Terminal · saída ilustrativa</span><span class="window-language">SAÍDA</span></figcaption><pre><code>$ python boletim.py
+Matrícula: 20260000000000
+Senha:
+Matemática 2
+Português 0</code></pre></figure>
+      <p>Saída fictícia: cada linha mostra a disciplina e seu número de faltas. Salve o exemplo anterior como <code>boletim.py</code> para executar.</p>
       <p>O bloco <code>with</code> libera conexões HTTP. Se não usá-lo, chame <code>suap.fechar()</code>. A biblioteca mantém credenciais somente em memória.</p>
     </section>
     <section id="exportacao">
       <h2>Exportar dados</h2><p>As consultas de listagem incluem todas as páginas. Avisos e prompts usam stderr; JSON e CSV usam stdout ou o arquivo escolhido.</p>
-      <pre><code>suapy boletim --ano 2026 --periodo 2 --formato csv --saida boletim.csv
+      <figure class="code-window terminal"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Terminal · Bash</span><span class="window-language">BASH</span></figcaption><pre><code>suapy boletim --ano 2026 --periodo 2 --formato csv --saida boletim.csv
 suapy avaliacoes --formato json &gt; avaliacoes.json
-suapy mensagens --status todas --formato json --saida mensagens.json</code></pre>
+suapy mensagens --status todas --formato json --saida mensagens.json</code></pre></figure>
       <p>Arquivos de <code>--saida</code> são criados com acesso restrito em POSIX. Uma redireção com <code>&gt;</code> usa as permissões do shell e pode sobrescrever arquivos.</p>
       <p>JSON preserva objetos e listas. No CSV, as colunas reúnem as chaves dos registros, valores aninhados viram JSON e campos ausentes ficam vazios. Textos que poderiam ser interpretados como fórmulas recebem um apóstrofo inicial.</p>
       <h3>Com Pandas</h3>
-      <pre><code>import pandas as pd
-from suapy import para_dataframe
+      <figure class="code-window editor"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">exemplo.py</span><span class="window-language">PYTHON</span></figcaption><pre><code><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
+<span class="syntax-keyword">from</span> suapy <span class="syntax-keyword">import</span> para_dataframe
 
-# Com suap autenticado e ano/periodo selecionados:
+<span class="syntax-comment"># Com suap autenticado e ano/periodo selecionados:</span>
 resposta = suap.ensino.obter_boletim(ano, periodo)
 df = para_dataframe(list(suap.iterar_resultados(resposta)))
-if "media_final_disciplina" in df.columns:
-    notas = pd.to_numeric(df["media_final_disciplina"], errors="coerce")
-    if notas.notna().any():
-        print(notas.mean())</code></pre>
+<span class="syntax-keyword">if</span> <span class="syntax-string">&quot;media_final_disciplina&quot;</span> <span class="syntax-keyword">in</span> df.columns:
+    notas = pd.to_numeric(df[<span class="syntax-string">&quot;media_final_disciplina&quot;</span>], errors=<span class="syntax-string">&quot;coerce&quot;</span>)
+    <span class="syntax-keyword">if</span> notas.notna().any():
+        print(notas.mean())</code></pre></figure>
       <p>Essa é uma média simples das notas disponíveis, não necessariamente o índice acadêmico oficial.</p>
     </section>
     <section id="sessao">
       <h2>Login e sessão</h2><p>O CLI do IFRN salva um refresh token em <code>~/.suapy/session.json</code>. A senha não é gravada. O token é uma credencial em texto simples; em POSIX, a pasta usa permissão 700 e o arquivo 600.</p>
-      <pre><code>suapy --sem-sessao
+      <figure class="code-window terminal"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Terminal · Bash</span><span class="window-language">BASH</span></figcaption><pre><code>suapy --sem-sessao
 suapy boletim --ano 2026 --periodo 2 --sem-sessao
-suapy --logout</code></pre>
+suapy --logout</code></pre></figure>
       <p><code>--sem-sessao</code> ignora a sessão existente e não a modifica, mesmo ao sair. <code>--logout</code> remove o arquivo local; não revoga o token no servidor. As duas opções não podem ser combinadas.</p>
       <p>Uma <code>--url-base</code> alternativa não lê nem grava a sessão do IFRN. Você autentica naquela instituição durante a execução.</p>
       <p>O cliente renova o acesso após um HTTP 401 e repete a chamada uma vez. Falhas de conexão não provocam novas tentativas automáticas.</p>
     </section>
     <section id="paginacao">
       <h2>URLs e paginação</h2><p>Um prefixo na URL base é preservado nos endpoints do cliente:</p>
-      <pre><code>suap = Suap(url_base="https://instituicao.example/suap")
-# obter_boletim(2026, 2) consulta:
-# https://instituicao.example/suap/api/ensino/meu-boletim/2026/2/</code></pre>
+      <figure class="code-window editor"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">exemplo.py</span><span class="window-language">PYTHON</span></figcaption><pre><code>suap = Suap(url_base=<span class="syntax-string">&quot;https://instituicao.example/suap&quot;</span>)
+<span class="syntax-comment"># obter_boletim(2026, 2) consulta:</span>
+<span class="syntax-comment"># https://instituicao.example/suap/api/ensino/meu-boletim/2026/2/</span></code></pre></figure>
       <p>Listas e objetos continuam sendo usados como JSON. Páginas com <code>results</code> são dicionários com um atributo interno para a URL de origem; os campos do JSON não são alterados. Assim, um <code>next</code> como <code>?page=2</code> é resolvido contra a URL consultada.</p>
       <p>Para páginas carregadas de outro lugar, informe a URL de origem se o link seguinte for relativo:</p>
-      <pre><code>pagina = {"results": [], "next": "?page=2"}
+      <figure class="code-window editor"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">exemplo.py</span><span class="window-language">PYTHON</span></figcaption><pre><code>pagina = {<span class="syntax-string">&quot;results&quot;</span>: [], <span class="syntax-string">&quot;next&quot;</span>: <span class="syntax-string">&quot;?page=2&quot;</span>}
 registros = suap.iterar_resultados(
     pagina,
-    url_origem="https://instituicao.example/suap/api/lista/"
-)</code></pre>
+    url_origem=<span class="syntax-string">&quot;https://instituicao.example/suap/api/lista/&quot;</span>
+)</code></pre></figure>
       <p>Links absolutos e relativos à raiz seguem a semântica da URL retornada pelo servidor. Links externos e ciclos são rejeitados. O iterador é incremental, mas cada página é carregada em memória. A exportação do CLI reúne todos os registros antes de escrever.</p>
+    </section>
+    <section id="agentes">
+      <h2>Ensine o Suapy à sua IA</h2>
+      <p>Uma skill é um arquivo de instruções que dá contexto ao agente. Esta reúne instalação, autenticação, perfil, métodos, paginação, exportação e tratamento de erros do Suapy 1.4.1.</p>
+      <p><a class="download" href="skills/suapy/SKILL.md" download="SKILL.md">Baixar SKILL.md</a> <a href="skills/suapy/SKILL.md">Ler instruções</a></p>
+      <h3>Use com o agente que preferir</h3>
+      <p>Se o seu agente aceita skills, coloque o arquivo em uma pasta chamada <code>suapy</code> no diretório de skills indicado por ele. Se não aceita, anexe o arquivo à conversa ou cole seu conteúdo como contexto. A instalação e a leitura de arquivos dependem da ferramenta escolhida.</p>
+      <p>Depois, envie uma instrução como esta:</p>
+      <figure class="code-window prompt"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Prompt para sua IA</span><span class="window-language">TEXTO</span></figcaption><pre><code>Leia o SKILL.md do Suapy que anexei e use suas instruções.
+Crie um script Python que peça minha matrícula e senha no terminal,
+faça login e mostre meu nome. Use getpass para a senha.
+Para consultar notas, descubra os períodos disponíveis antes de buscar o boletim.</code></pre></figure>
+      <p>O arquivo contém conhecimento técnico da biblioteca, sem credenciais ou dados de contas.</p>
     </section>
     <section id="api">
       <h2>Métodos da API</h2><p>Todos os métodos dependem dos endpoints e das permissões da instituição.</p>
@@ -135,13 +174,13 @@ registros = suap.iterar_resultados(
       <tr><td><code>pesquisa_extensao</code></td><td><code>obter_projetos_pesquisa()</code>, <code>obter_projetos_extensao()</code>.</td></tr>
       </tbody></table></div>
       <h3>Identificar a conta</h3><p><code>autenticar(usuario, senha)</code> faz o login, devolve um <code>Perfil</code> (matrícula, nome, e-mail, campus, vínculos e <code>aluno_ativo</code>) e fecha a conexão sem guardar tokens. Com um cliente autenticado, use <code>suap.obter_perfil()</code>.</p>
-      <pre><code>from suapy import autenticar
+      <figure class="code-window editor"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">exemplo.py</span><span class="window-language">PYTHON</span></figcaption><pre><code><span class="syntax-keyword">from</span> suapy <span class="syntax-keyword">import</span> autenticar
 perfil = autenticar(matricula, senha)
-if perfil.aluno_ativo:
-    print(perfil.nome, perfil.vinculo_aluno_ativo.curso)</code></pre>
+<span class="syntax-keyword">if</span> perfil.aluno_ativo:
+    print(perfil.nome, perfil.vinculo_aluno_ativo.curso)</code></pre></figure>
       <p>Para notas e faltas de alunos, use boletim. Diários podem exigir perfil de professor. Métodos funcionais podem exigir vínculo de servidor.</p>
-      <h3>Interpretar horários</h3><pre><code>from suapy import parse_horario
-print(parse_horario("2V34 / 4V56"))</code></pre>
+      <h3>Interpretar horários</h3><figure class="code-window editor"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">exemplo.py</span><span class="window-language">PYTHON</span></figcaption><pre><code><span class="syntax-keyword">from</span> suapy <span class="syntax-keyword">import</span> parse_horario
+print(parse_horario(<span class="syntax-string">&quot;2V34 / 4V56&quot;</span>))</code></pre></figure>
       <p>O retorno contém <code>dia_semana</code>, <code>dia_num</code>, <code>turno</code> e <code>horarios</code>. O número 2 representa segunda-feira; V representa tarde. Os números 3 e 4 representam tempos de aula, não horas do relógio.</p>
     </section>
     <section id="erros">
@@ -157,21 +196,21 @@ print(parse_horario("2V34 / 4V56"))</code></pre>
     </section>
     <section id="testes">
       <h2>Testes</h2><p>Os testes padrão simulam a API e não acessam uma conta:</p>
-      <pre><code>python -m pip install -e ".[dev,pandas]"
-python -m pytest -q</code></pre>
+      <figure class="code-window terminal"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Terminal · Bash</span><span class="window-language">BASH</span></figcaption><pre><code>python -m pip install -e &quot;.[dev,pandas]&quot;
+python -m pytest -q</code></pre></figure>
       <h3>Uma conta real de teste</h3><p>Em Bash, forneça as credenciais sem gravar a senha no histórico:</p>
-      <pre><code>read -r -p "Matrícula de teste: " SUAP_TEST_USERNAME
-read -r -s -p "Senha de teste: " SUAP_TEST_PASSWORD
+      <figure class="code-window terminal"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Terminal · Bash</span><span class="window-language">BASH</span></figcaption><pre><code>read -r -p &quot;Matrícula de teste: &quot; SUAP_TEST_USERNAME
+read -r -s -p &quot;Senha de teste: &quot; SUAP_TEST_PASSWORD
 export SUAP_TEST_USERNAME SUAP_TEST_PASSWORD
 python scripts/test_live.py
-unset SUAP_TEST_USERNAME SUAP_TEST_PASSWORD</code></pre>
+unset SUAP_TEST_USERNAME SUAP_TEST_PASSWORD</code></pre></figure>
       <p>Para outra instituição, defina também <code>SUAP_TEST_URL</code>. O teste autentica, renova o token e consulta dados do aluno, períodos, boletim, turmas e avaliações. Não imprime respostas nem salva tokens. Uma lista vazia não permite validar os campos dos registros.</p>
       <p>Sem credenciais ou sem períodos, o teste retorna 2 (pendente/incompleto). Erros retornam 1. Isso não substitui testes com os diferentes perfis e permissões usados pela instituição.</p>
     </section>
     <section id="publicacao">
       <h2>Publicação e diagnóstico</h2><p>O publicador deve ser do tipo <strong>GitHub</strong> no PyPI: proprietário <code>kellyson71</code>, repositório <code>suapy</code>, workflow <code>release.yml</code>, environment <code>pypi</code>.</p>
       <p>Para testar somente a autenticação, abra Actions → Publish to PyPI → Run workflow, ou use:</p>
-      <pre><code>gh workflow run release.yml --ref main</code></pre>
+      <figure class="code-window terminal"><figcaption><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">Terminal · Bash</span><span class="window-language">BASH</span></figcaption><pre><code>gh workflow run release.yml --ref main</code></pre></figure>
       <p>A execução manual troca a identidade do GitHub por uma credencial temporária do PyPI e a descarta. Não constrói, envia ou republica pacotes. Um erro <code>invalid-publisher</code> pede revisão do provedor e dos quatro campos do cadastro.</p>
       <p>A publicação real ocorre ao publicar uma release com tag correspondente à versão em <code>pyproject.toml</code>. Ela passa pelos testes e pela validação dos pacotes. Uma versão já publicada não pode ser sobrescrita.</p>
       <p>Consulte a <a href="https://docs.pypi.org/trusted-publishers/using-a-publisher/">documentação do PyPI</a> e o <a href="https://github.com/kellyson71/suapy/blob/main/CONTRIBUTING.md">guia de contribuição</a>.</p>
